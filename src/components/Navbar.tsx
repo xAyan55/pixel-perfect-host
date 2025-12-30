@@ -1,23 +1,25 @@
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Terminal } from "lucide-react";
 
 const navLinks = [
-  { name: "Home", href: "#" },
-  { name: "About", href: "#about" },
-  { name: "Cloud", href: "#cloud" },
-  { name: "Game Servers", href: "#gameservers" },
-  { name: "Web Hosting", href: "#webhosting" },
+  { name: "Home", href: "/" },
+  { name: "Game Servers", href: "/game-servers" },
+  { name: "Cloud VPS", href: "/cloud-vps" },
+  { name: "Web Hosting", href: "/web-hosting" },
+  { name: "Bot Hosting", href: "/bot-hosting" },
 ];
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
               <svg viewBox="0 0 24 24" className="w-5 h-5 text-primary" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 2L2 7l10 5 10-5-10-5z" />
@@ -29,23 +31,27 @@ export const Navbar = () => {
               <span className="text-primary">KINETIC</span>
               <span className="text-foreground">HOST</span>
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a key={link.name} href={link.href} className="nav-link">
+              <Link
+                key={link.name}
+                to={link.href}
+                className={`nav-link ${location.pathname === link.href ? "text-primary" : ""}`}
+              >
                 {link.name}
-              </a>
+              </Link>
             ))}
           </div>
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-4">
-            <a href="#" className="btn-outline text-sm py-2">
+            <Link to="/admin/login" className="btn-outline text-sm py-2">
               <Terminal className="w-4 h-4" />
-              Control Panels
-            </a>
+              Control Panel
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -62,19 +68,19 @@ export const Navbar = () => {
           <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.name}
-                  href={link.href}
-                  className="nav-link py-2"
+                  to={link.href}
+                  className={`nav-link py-2 ${location.pathname === link.href ? "text-primary" : ""}`}
                   onClick={() => setIsOpen(false)}
                 >
                   {link.name}
-                </a>
+                </Link>
               ))}
-              <a href="#" className="btn-primary w-fit mt-2">
+              <Link to="/admin/login" className="btn-primary w-fit mt-2" onClick={() => setIsOpen(false)}>
                 <Terminal className="w-4 h-4" />
-                Control Panels
-              </a>
+                Control Panel
+              </Link>
             </div>
           </div>
         )}
