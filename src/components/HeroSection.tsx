@@ -1,7 +1,39 @@
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronRight, Gift } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import heroCharacter from "@/assets/hero-character.png";
 
+interface SiteSettings {
+  get_started_url: string;
+  free_server_url: string;
+  free_server_enabled: string;
+  logo_url: string;
+  panel_preview_url: string;
+}
+
 export const HeroSection = () => {
+  const [settings, setSettings] = useState<SiteSettings>({
+    get_started_url: "#solutions",
+    free_server_url: "#",
+    free_server_enabled: "true",
+    logo_url: "",
+    panel_preview_url: "",
+  });
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase.from("site_settings").select("*");
+      if (data) {
+        const settingsMap: Record<string, string> = {};
+        data.forEach((item: { setting_key: string; setting_value: string }) => {
+          settingsMap[item.setting_key] = item.setting_value || "";
+        });
+        setSettings((prev) => ({ ...prev, ...settingsMap }));
+      }
+    };
+    fetchSettings();
+  }, []);
+
   return (
     <section className="relative min-h-screen pt-24 pb-16 overflow-hidden">
       {/* Background gradient effects */}
@@ -27,8 +59,8 @@ export const HeroSection = () => {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-4 opacity-0 animate-fade-in animation-delay-200">
-              <a href="#solutions" className="btn-primary group">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 opacity-0 animate-fade-in animation-delay-200">
+              <a href={settings.get_started_url} className="btn-primary group">
                 Let's Get Started
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </a>
@@ -37,6 +69,25 @@ export const HeroSection = () => {
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </a>
             </div>
+
+            {/* Free Server Button */}
+            {settings.free_server_enabled === "true" && (
+              <div className="opacity-0 animate-fade-in animation-delay-400">
+                <a
+                  href={settings.free_server_url}
+                  className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-primary/20 border border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 group"
+                >
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <Gift className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-emerald-400">Claim Free Server</p>
+                    <p className="text-xs text-muted-foreground">Limited time offer!</p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Right Content - Minecraft Character */}

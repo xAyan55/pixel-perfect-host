@@ -24,6 +24,7 @@ export type Database = {
           enabled: boolean | null
           features: string[]
           id: string
+          image_url: string | null
           name: string
           popular: boolean | null
           price: number
@@ -42,6 +43,7 @@ export type Database = {
           enabled?: boolean | null
           features?: string[]
           id?: string
+          image_url?: string | null
           name: string
           popular?: boolean | null
           price: number
@@ -60,6 +62,7 @@ export type Database = {
           enabled?: boolean | null
           features?: string[]
           id?: string
+          image_url?: string | null
           name?: string
           popular?: boolean | null
           price?: number
@@ -67,6 +70,30 @@ export type Database = {
           redirect_url?: string
           sort_order?: number | null
           storage?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          created_at: string
+          id: string
+          setting_key: string
+          setting_value: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          setting_key: string
+          setting_value?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          setting_key?: string
+          setting_value?: string | null
           updated_at?: string
         }
         Relationships: []
