@@ -26,7 +26,7 @@ export const Navbar = () => {
               </svg>
             </div>
             <span className="text-xl font-bold">
-              <span className="text-primary">LUMEN</span>
+              <span className="text-primary">KINETIC</span>
               <span className="text-foreground">HOST</span>
             </span>
           </a>
