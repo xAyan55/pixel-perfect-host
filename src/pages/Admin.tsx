@@ -7,11 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
   LogOut, Plus, Pencil, Trash2, Gamepad2, Cloud, Globe, Bot,
-  Loader2, Save, X, HardDrive, Cpu, Wifi, DollarSign
+  Loader2, Save, X, HardDrive, Cpu, Wifi, Settings, Upload, Image
 } from "lucide-react";
 
 type Category = "game" | "vps" | "web" | "bot";
@@ -31,6 +32,15 @@ interface Plan {
   popular: boolean;
   enabled: boolean;
   sort_order: number;
+  image_url?: string;
+}
+
+interface SiteSettings {
+  get_started_url: string;
+  free_server_url: string;
+  free_server_enabled: string;
+  logo_url: string;
+  panel_preview_url: string;
 }
 
 const categoryIcons = {
@@ -61,6 +71,7 @@ const emptyPlan: Omit<Plan, "id"> = {
   popular: false,
   enabled: true,
   sort_order: 0,
+  image_url: "",
 };
 
 export default function Admin() {
@@ -75,6 +86,18 @@ export default function Admin() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [featuresText, setFeaturesText] = useState("");
+  const [activeTab, setActiveTab] = useState("plans");
+  
+  // Site Settings
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>({
+    get_started_url: "",
+    free_server_url: "",
+    free_server_enabled: "true",
+    logo_url: "",
+    panel_preview_url: "",
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && (!user || !isAdmin)) {
@@ -85,6 +108,7 @@ export default function Admin() {
   useEffect(() => {
     if (user && isAdmin) {
       fetchPlans();
+      fetchSiteSettings();
     }
   }, [user, isAdmin]);
 
@@ -96,15 +120,22 @@ export default function Admin() {
       .order("sort_order", { ascending: true });
 
     if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load plans",
-      });
+      toast({ variant: "destructive", title: "Error", description: "Failed to load plans" });
     } else {
       setPlans((data as Plan[]) || []);
     }
     setLoadingPlans(false);
+  };
+
+  const fetchSiteSettings = async () => {
+    const { data } = await supabase.from("site_settings").select("*");
+    if (data) {
+      const settingsMap: Record<string, string> = {};
+      data.forEach((item: { setting_key: string; setting_value: string }) => {
+        settingsMap[item.setting_key] = item.setting_value || "";
+      });
+      setSiteSettings((prev) => ({ ...prev, ...settingsMap }));
+    }
   };
 
   const handleCreatePlan = () => {
@@ -129,7 +160,6 @@ export default function Admin() {
     };
 
     if (editingPlan.id) {
-      // Update existing plan
       const { error } = await supabase
         .from("hosting_plans")
         .update({
@@ -145,6 +175,7 @@ export default function Admin() {
           popular: planData.popular,
           enabled: planData.enabled,
           sort_order: planData.sort_order,
+          image_url: planData.image_url,
         })
         .eq("id", editingPlan.id);
 
@@ -155,7 +186,6 @@ export default function Admin() {
         fetchPlans();
       }
     } else {
-      // Create new plan
       const { error } = await supabase.from("hosting_plans").insert({
         category: planData.category,
         name: planData.name,
@@ -170,6 +200,7 @@ export default function Admin() {
         popular: planData.popular,
         enabled: planData.enabled,
         sort_order: planData.sort_order,
+        image_url: planData.image_url,
       });
 
       if (error) {
@@ -209,6 +240,61 @@ export default function Admin() {
     } else {
       fetchPlans();
     }
+  };
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    
+    for (const [key, value] of Object.entries(siteSettings)) {
+      const { error } = await supabase
+        .from("site_settings")
+        .upsert({ setting_key: key, setting_value: value }, { onConflict: "setting_key" });
+      
+      if (error) {
+        toast({ variant: "destructive", title: "Error", description: `Failed to save ${key}` });
+        setSavingSettings(false);
+        return;
+      }
+    }
+    
+    toast({ title: "Success", description: "Settings saved successfully" });
+    setSavingSettings(false);
+  };
+
+  const handleImageUpload = async (
+    file: File, 
+    type: "logo" | "panel_preview" | "plan",
+    planId?: string
+  ) => {
+    setUploadingImage(type === "plan" ? planId! : type);
+    
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${type}-${Date.now()}.${fileExt}`;
+    const filePath = `${type}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("site-assets")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      toast({ variant: "destructive", title: "Error", description: "Failed to upload image" });
+      setUploadingImage(null);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from("site-assets").getPublicUrl(filePath);
+    const publicUrl = urlData.publicUrl;
+
+    if (type === "logo") {
+      setSiteSettings((prev) => ({ ...prev, logo_url: publicUrl }));
+    } else if (type === "panel_preview") {
+      setSiteSettings((prev) => ({ ...prev, panel_preview_url: publicUrl }));
+    } else if (type === "plan" && editingPlan) {
+      setEditingPlan({ ...editingPlan, image_url: publicUrl });
+    }
+
+    toast({ title: "Success", description: "Image uploaded successfully" });
+    setUploadingImage(null);
   };
 
   const handleLogout = async () => {
@@ -257,124 +343,291 @@ export default function Admin() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Category Tabs */}
-        <div className="flex flex-wrap gap-3 mb-8">
-          {(Object.keys(categoryNames) as Category[]).map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                activeCategory === cat
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-card/50 text-muted-foreground hover:bg-card border border-border/50"
-              }`}
-            >
-              {categoryIcons[cat]}
-              {categoryNames[cat]}
-              <Badge variant="secondary" className="ml-1">
-                {plans.filter((p) => p.category === cat).length}
-              </Badge>
-            </button>
-          ))}
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="bg-card/50 border border-border/50">
+            <TabsTrigger value="plans" className="data-[state=active]:bg-primary">
+              <Gamepad2 className="w-4 h-4 mr-2" />
+              Hosting Plans
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-primary">
+              <Settings className="w-4 h-4 mr-2" />
+              Site Settings
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Actions */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">{categoryNames[activeCategory]} Plans</h2>
-          <Button onClick={handleCreatePlan}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Plan
-          </Button>
-        </div>
+          {/* Plans Tab */}
+          <TabsContent value="plans" className="space-y-6">
+            {/* Category Tabs */}
+            <div className="flex flex-wrap gap-3">
+              {(Object.keys(categoryNames) as Category[]).map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                    activeCategory === cat
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-card/50 text-muted-foreground hover:bg-card border border-border/50"
+                  }`}
+                >
+                  {categoryIcons[cat]}
+                  {categoryNames[cat]}
+                  <Badge variant="secondary" className="ml-1">
+                    {plans.filter((p) => p.category === cat).length}
+                  </Badge>
+                </button>
+              ))}
+            </div>
 
-        {/* Plans Grid */}
-        {loadingPlans ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
-        ) : filteredPlans.length === 0 ? (
-          <Card className="bg-card/50 border-border/50">
-            <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">No plans found. Create your first plan!</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPlans.map((plan) => (
-              <Card
-                key={plan.id}
-                className={`bg-card/50 border-border/50 relative ${
-                  !plan.enabled ? "opacity-60" : ""
-                }`}
-              >
-                {plan.popular && (
-                  <Badge className="absolute top-2 right-2 bg-primary">Popular</Badge>
-                )}
+            {/* Actions */}
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">{categoryNames[activeCategory]} Plans</h2>
+              <Button onClick={handleCreatePlan}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Plan
+              </Button>
+            </div>
+
+            {/* Plans Grid */}
+            {loadingPlans ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : filteredPlans.length === 0 ? (
+              <Card className="bg-card/50 border-border/50">
+                <CardContent className="py-12 text-center">
+                  <p className="text-muted-foreground">No plans found. Create your first plan!</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredPlans.map((plan) => (
+                  <Card
+                    key={plan.id}
+                    className={`bg-card/50 border-border/50 relative ${
+                      !plan.enabled ? "opacity-60" : ""
+                    }`}
+                  >
+                    {plan.popular && (
+                      <Badge className="absolute top-2 right-2 bg-primary">Popular</Badge>
+                    )}
+                    {plan.image_url && (
+                      <div className="h-32 overflow-hidden rounded-t-lg">
+                        <img src={plan.image_url} alt={plan.name} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">{plan.name}</CardTitle>
+                        <Switch
+                          checked={plan.enabled}
+                          onCheckedChange={() => handleToggleEnabled(plan)}
+                        />
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-bold text-primary">${plan.price}</span>
+                        <span className="text-muted-foreground">/{plan.billing_cycle}</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <HardDrive className="w-3 h-3 text-primary" />
+                          <span className="text-muted-foreground">RAM:</span>
+                          <span>{plan.ram}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Cpu className="w-3 h-3 text-primary" />
+                          <span className="text-muted-foreground">CPU:</span>
+                          <span>{plan.cpu}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <HardDrive className="w-3 h-3 text-primary" />
+                          <span className="text-muted-foreground">Disk:</span>
+                          <span>{plan.storage}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Wifi className="w-3 h-3 text-primary" />
+                          <span className="text-muted-foreground">BW:</span>
+                          <span>{plan.bandwidth}</span>
+                        </div>
+                      </div>
+
+                      <div className="text-xs text-muted-foreground truncate">
+                        URL: {plan.redirect_url}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => handleEditPlan(plan)}
+                        >
+                          <Pencil className="w-3 h-3 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                          onClick={() => handleDeletePlan(plan.id)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* Button URLs */}
+              <Card className="bg-card/50 border-border/50">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{plan.name}</CardTitle>
-                    <Switch
-                      checked={plan.enabled}
-                      onCheckedChange={() => handleToggleEnabled(plan)}
-                    />
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-bold text-primary">${plan.price}</span>
-                    <span className="text-muted-foreground">/{plan.billing_cycle}</span>
-                  </div>
+                  <CardTitle className="text-lg">Button URLs</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <HardDrive className="w-3 h-3 text-primary" />
-                      <span className="text-muted-foreground">RAM:</span>
-                      <span>{plan.ram}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Cpu className="w-3 h-3 text-primary" />
-                      <span className="text-muted-foreground">CPU:</span>
-                      <span>{plan.cpu}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <HardDrive className="w-3 h-3 text-primary" />
-                      <span className="text-muted-foreground">Disk:</span>
-                      <span>{plan.storage}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Wifi className="w-3 h-3 text-primary" />
-                      <span className="text-muted-foreground">BW:</span>
-                      <span>{plan.bandwidth}</span>
-                    </div>
+                  <div>
+                    <label className="text-sm font-medium">Let's Get Started Button URL</label>
+                    <Input
+                      value={siteSettings.get_started_url}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, get_started_url: e.target.value })}
+                      placeholder="https://billing.example.com"
+                    />
                   </div>
-
-                  <div className="text-xs text-muted-foreground truncate">
-                    URL: {plan.redirect_url}
+                  <div>
+                    <label className="text-sm font-medium">Free Server Button URL</label>
+                    <Input
+                      value={siteSettings.free_server_url}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, free_server_url: e.target.value })}
+                      placeholder="https://billing.example.com/free"
+                    />
                   </div>
-
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => handleEditPlan(plan)}
-                    >
-                      <Pencil className="w-3 h-3 mr-1" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                      onClick={() => handleDeletePlan(plan.id)}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      checked={siteSettings.free_server_enabled === "true"}
+                      onCheckedChange={(checked) =>
+                        setSiteSettings({ ...siteSettings, free_server_enabled: checked ? "true" : "false" })
+                      }
+                    />
+                    <label className="text-sm font-medium">Show "Claim Free Server" Button</label>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
+
+              {/* Logo Upload */}
+              <Card className="bg-card/50 border-border/50">
+                <CardHeader>
+                  <CardTitle className="text-lg">Site Logo</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    {siteSettings.logo_url ? (
+                      <img src={siteSettings.logo_url} alt="Logo" className="h-16 w-auto rounded" />
+                    ) : (
+                      <div className="h-16 w-16 rounded bg-muted flex items-center justify-center">
+                        <Image className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <Input
+                        value={siteSettings.logo_url}
+                        onChange={(e) => setSiteSettings({ ...siteSettings, logo_url: e.target.value })}
+                        placeholder="Logo URL"
+                        className="mb-2"
+                      />
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(file, "logo");
+                          }}
+                        />
+                        <Button variant="outline" size="sm" asChild disabled={uploadingImage === "logo"}>
+                          <span>
+                            {uploadingImage === "logo" ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <Upload className="w-4 h-4 mr-2" />
+                            )}
+                            Upload Logo
+                          </span>
+                        </Button>
+                      </label>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Panel Preview Upload */}
+              <Card className="bg-card/50 border-border/50 lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">Panel Preview Image</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    {siteSettings.panel_preview_url ? (
+                      <img src={siteSettings.panel_preview_url} alt="Panel Preview" className="h-48 w-auto rounded object-cover" />
+                    ) : (
+                      <div className="h-48 w-80 rounded bg-muted flex items-center justify-center">
+                        <Image className="w-12 h-12 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1 space-y-2">
+                      <Input
+                        value={siteSettings.panel_preview_url}
+                        onChange={(e) => setSiteSettings({ ...siteSettings, panel_preview_url: e.target.value })}
+                        placeholder="Panel Preview URL"
+                      />
+                      <label className="cursor-pointer inline-block">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(file, "panel_preview");
+                          }}
+                        />
+                        <Button variant="outline" size="sm" asChild disabled={uploadingImage === "panel_preview"}>
+                          <span>
+                            {uploadingImage === "panel_preview" ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <Upload className="w-4 h-4 mr-2" />
+                            )}
+                            Upload Panel Preview
+                          </span>
+                        </Button>
+                      </label>
+                      <p className="text-xs text-muted-foreground">
+                        This image will be displayed in the Solutions section.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="flex justify-end">
+              <Button onClick={handleSaveSettings} disabled={savingSettings}>
+                {savingSettings ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                Save Settings
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Edit/Create Dialog */}
@@ -494,6 +747,48 @@ export default function Admin() {
                   onChange={(e) => setEditingPlan({ ...editingPlan, redirect_url: e.target.value })}
                   placeholder="https://billing.kinetichost.space/..."
                 />
+              </div>
+
+              {/* Plan Image Upload */}
+              <div>
+                <label className="text-sm font-medium">Plan Image</label>
+                <div className="flex items-center gap-4 mt-2">
+                  {editingPlan.image_url ? (
+                    <img src={editingPlan.image_url} alt="Plan" className="h-20 w-32 object-cover rounded" />
+                  ) : (
+                    <div className="h-20 w-32 rounded bg-muted flex items-center justify-center">
+                      <Image className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="flex-1 space-y-2">
+                    <Input
+                      value={editingPlan.image_url || ""}
+                      onChange={(e) => setEditingPlan({ ...editingPlan, image_url: e.target.value })}
+                      placeholder="Image URL"
+                    />
+                    <label className="cursor-pointer inline-block">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(file, "plan", editingPlan.id);
+                        }}
+                      />
+                      <Button variant="outline" size="sm" asChild disabled={uploadingImage === editingPlan.id}>
+                        <span>
+                          {uploadingImage === editingPlan.id ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Upload className="w-4 h-4 mr-2" />
+                          )}
+                          Upload Image
+                        </span>
+                      </Button>
+                    </label>
+                  </div>
+                </div>
               </div>
 
               <div>

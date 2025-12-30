@@ -1,4 +1,5 @@
 import { Shield, Wifi, Cpu, MapPin, HeadphonesIcon, Eye } from "lucide-react";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 const features = [
   {
@@ -34,14 +35,16 @@ const features = [
 ];
 
 export const FeaturesSection = () => {
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 });
+
   return (
-    <section id="features" className="py-24 relative">
+    <section id="features" className="py-24 relative" ref={ref}>
       <div className="container mx-auto px-6">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="feature-card group"
+              className={`feature-card group scroll-animate ${isVisible ? "visible" : ""} stagger-${index + 1}`}
             >
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                 <feature.icon className="w-6 h-6 text-primary" />

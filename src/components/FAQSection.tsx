@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 const faqs = [
   {
@@ -37,11 +38,14 @@ const faqs = [
 ];
 
 export const FAQSection = () => {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.3 });
+  const { ref: contentRef, isVisible: contentVisible } = useScrollAnimation({ threshold: 0.1 });
+
   return (
     <section id="faq" className="py-24 relative">
       <div className="container mx-auto px-6 max-w-4xl">
         {/* Section Header */}
-        <div className="text-center mb-12">
+        <div ref={headerRef} className={`text-center mb-12 scroll-animate ${headerVisible ? "visible" : ""}`}>
           <h2 className="section-title mb-4">Frequently Asked Questions</h2>
           <p className="text-muted-foreground">
             Can't find what you're looking for?
@@ -49,25 +53,27 @@ export const FAQSection = () => {
         </div>
 
         {/* FAQ Accordion */}
-        <Accordion type="single" collapsible className="space-y-4">
-          {faqs.map((faq, index) => (
-            <AccordionItem
-              key={index}
-              value={`item-${index}`}
-              className="glass-card px-6 border-none"
-            >
-              <AccordionTrigger className="text-left hover:no-underline hover:text-primary py-6">
-                {faq.question}
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pb-6">
-                {faq.answer}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        <div ref={contentRef}>
+          <Accordion type="single" collapsible className="space-y-4">
+            {faqs.map((faq, index) => (
+              <AccordionItem
+                key={index}
+                value={`item-${index}`}
+                className={`glass-card px-6 border-none scroll-animate ${contentVisible ? "visible" : ""} stagger-${Math.min(index + 1, 6)}`}
+              >
+                <AccordionTrigger className="text-left hover:no-underline hover:text-primary py-6">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground pb-6">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
 
         {/* Documentation Link */}
-        <p className="text-center text-muted-foreground mt-8">
+        <p className={`text-center text-muted-foreground mt-8 scroll-animate ${contentVisible ? "visible" : ""}`}>
           Did we miss something? Check out our{" "}
           <a href="#" className="text-primary hover:underline">Documentation</a>
         </p>
