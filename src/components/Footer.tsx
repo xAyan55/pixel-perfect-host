@@ -47,10 +47,10 @@ export const Footer = () => {
                   <path d="M2 12l10 5 10-5" />
                 </svg>
               </div>
-              <span className="text-xl font-bold">
-                <span className="text-primary">LUMEN</span>
-                <span className="text-foreground">HOST</span>
-              </span>
+            <span className="text-xl font-bold">
+              <span className="text-primary">KINETIC</span>
+              <span className="text-foreground">HOST</span>
+            </span>
             </a>
             <p className="text-sm text-muted-foreground mb-6 max-w-xs">
               Your ultimate destination for instantly deployable game servers. 
@@ -130,7 +130,7 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-border/50 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} LumenHost. All rights reserved.
+            © {new Date().getFullYear()} KineticHost. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground">
             Made with ❤️ for gamers
