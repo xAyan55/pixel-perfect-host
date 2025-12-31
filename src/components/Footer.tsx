@@ -1,11 +1,21 @@
-import { Github, Twitter, MessageCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Github, Twitter, MessageCircle, Youtube, Linkedin, Instagram } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface SocialLink {
+  id: string;
+  platform: string;
+  url: string;
+  icon: string;
+}
 
 const footerLinks = {
   product: [
-    { name: "Game Servers", href: "#" },
-    { name: "Web Hosting", href: "#" },
-    { name: "Cloud Hosting", href: "#" },
-    { name: "Bot Hosting", href: "#" },
+    { name: "Game Servers", href: "/game-servers" },
+    { name: "Web Hosting", href: "/web-hosting" },
+    { name: "Cloud VPS", href: "/cloud-vps" },
+    { name: "Bot Hosting", href: "/bot-hosting" },
   ],
   company: [
     { name: "About", href: "#" },
@@ -26,20 +36,40 @@ const footerLinks = {
   ],
 };
 
-const socialLinks = [
-  { icon: MessageCircle, href: "#", label: "Discord" },
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Github, href: "#", label: "GitHub" },
-];
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  discord: MessageCircle,
+  twitter: Twitter,
+  github: Github,
+  youtube: Youtube,
+  linkedin: Linkedin,
+  instagram: Instagram,
+};
 
 export const Footer = () => {
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+
+  useEffect(() => {
+    const fetchSocialLinks = async () => {
+      const { data } = await supabase
+        .from("social_links")
+        .select("*")
+        .eq("enabled", true)
+        .order("sort_order", { ascending: true });
+      
+      if (data) {
+        setSocialLinks(data);
+      }
+    };
+    fetchSocialLinks();
+  }, []);
+
   return (
     <footer className="border-t border-border/50 py-16">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 mb-12">
           {/* Logo & Description */}
           <div className="col-span-2">
-            <a href="#" className="flex items-center gap-2 mb-4">
+            <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
                 <svg viewBox="0 0 24 24" className="w-5 h-5 text-primary" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 2L2 7l10 5 10-5-10-5z" />
@@ -51,22 +81,27 @@ export const Footer = () => {
               <span className="text-primary">KINETIC</span>
               <span className="text-foreground">HOST</span>
             </span>
-            </a>
+            </Link>
             <p className="text-sm text-muted-foreground mb-6 max-w-xs">
               Your ultimate destination for instantly deployable game servers. 
               Fast, secure, and reliable hosting.
             </p>
             <div className="flex gap-4">
-              {socialLinks.map((social, index) => (
-                <a
-                  key={index}
-                  href={social.href}
-                  className="w-10 h-10 rounded-lg bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-                  aria-label={social.label}
-                >
-                  <social.icon className="w-5 h-5" />
-                </a>
-              ))}
+              {socialLinks.map((social) => {
+                const IconComponent = iconMap[social.icon.toLowerCase()] || MessageCircle;
+                return (
+                  <a
+                    key={social.id}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-lg bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                    aria-label={social.platform}
+                  >
+                    <IconComponent className="w-5 h-5" />
+                  </a>
+                );
+              })}
             </div>
           </div>
 
@@ -76,9 +111,9 @@ export const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.product.map((link, index) => (
                 <li key={index}>
-                  <a href={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <Link to={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
