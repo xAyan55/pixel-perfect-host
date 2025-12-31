@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -5,41 +6,36 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { supabase } from "@/integrations/supabase/client";
 
-const faqs = [
-  {
-    question: "Where are your servers located?",
-    answer: "All of our servers are currently based in the United States with data centers strategically located to provide optimal performance and low latency for North American users."
-  },
-  {
-    question: "How much technical knowledge do I need to run a game server?",
-    answer: "Very little! Our control panel is designed to be user-friendly and intuitive. We provide one-click installations, easy configuration options, and comprehensive documentation to help you get started quickly."
-  },
-  {
-    question: "How secure is my information at Sano?",
-    answer: "We take security very seriously. All data is encrypted, and we implement industry-standard security practices including DDoS protection, regular security audits, and secure authentication methods."
-  },
-  {
-    question: "Is it possible for my server to be DDoS attacked?",
-    answer: "While DDoS attacks can target any online service, our servers are protected behind 4+ TB of PATH.Net DDoS protection with game-specific filtering to mitigate and stop attacks effectively."
-  },
-  {
-    question: "Can I request a custom service?",
-    answer: "Absolutely! We're always open to discussing custom solutions. Reach out to our support team through Discord or our contact form to discuss your specific needs."
-  },
-  {
-    question: "Why is Sano free?",
-    answer: "We believe everyone should have access to quality game server hosting. Our free tier is supported by our premium services and community donations, allowing us to offer reliable hosting at no cost."
-  },
-  {
-    question: "My server is on, but I can't connect.",
-    answer: "This is usually a configuration issue. Check that your server's port is correctly configured, ensure any firewalls are properly set up, and verify your connection details. Our documentation and support team can help troubleshoot further."
-  }
-];
+interface FAQ {
+  id: string;
+  question: string;
+  answer: string;
+  sort_order: number;
+}
 
 export const FAQSection = () => {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.3 });
   const { ref: contentRef, isVisible: contentVisible } = useScrollAnimation({ threshold: 0.1 });
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
+
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      const { data } = await supabase
+        .from("faqs")
+        .select("*")
+        .eq("enabled", true)
+        .order("sort_order", { ascending: true });
+      
+      if (data) {
+        setFaqs(data);
+      }
+    };
+    fetchFaqs();
+  }, []);
+
+  if (faqs.length === 0) return null;
 
   return (
     <section id="faq" className="py-24 relative">
@@ -57,8 +53,8 @@ export const FAQSection = () => {
           <Accordion type="single" collapsible className="space-y-4">
             {faqs.map((faq, index) => (
               <AccordionItem
-                key={index}
-                value={`item-${index}`}
+                key={faq.id}
+                value={`item-${faq.id}`}
                 className={`glass-card px-6 border-none scroll-animate ${contentVisible ? "visible" : ""} stagger-${Math.min(index + 1, 6)}`}
               >
                 <AccordionTrigger className="text-left hover:no-underline hover:text-primary py-6">

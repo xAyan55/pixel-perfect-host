@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import {
   LogOut, Plus, Pencil, Trash2, Gamepad2, Cloud, Globe, Bot,
-  Loader2, Save, X, HardDrive, Cpu, Wifi, Settings, Upload, Image
+  Loader2, Save, X, HardDrive, Cpu, Wifi, Settings, Upload, Image,
+  HelpCircle, Link as LinkIcon
 } from "lucide-react";
 
 type Category = "game" | "vps" | "web" | "bot";
@@ -33,6 +34,23 @@ interface Plan {
   enabled: boolean;
   sort_order: number;
   image_url?: string;
+}
+
+interface FAQ {
+  id: string;
+  question: string;
+  answer: string;
+  sort_order: number;
+  enabled: boolean;
+}
+
+interface SocialLink {
+  id: string;
+  platform: string;
+  url: string;
+  icon: string;
+  sort_order: number;
+  enabled: boolean;
 }
 
 interface SiteSettings {
@@ -75,21 +93,40 @@ const emptyPlan: Omit<Plan, "id"> = {
   image_url: "",
 };
 
+const emptyFaq: Omit<FAQ, "id"> = {
+  question: "",
+  answer: "",
+  sort_order: 0,
+  enabled: true,
+};
+
+const emptySocialLink: Omit<SocialLink, "id"> = {
+  platform: "",
+  url: "",
+  icon: "discord",
+  sort_order: 0,
+  enabled: true,
+};
+
 export default function Admin() {
   const { user, isAdmin, isLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [activeCategory, setActiveCategory] = useState<Category>("game");
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
+  const [editingFaq, setEditingFaq] = useState<FAQ | null>(null);
+  const [editingSocialLink, setEditingSocialLink] = useState<SocialLink | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<"plan" | "faq" | "social">("plan");
   const [isSaving, setIsSaving] = useState(false);
   const [featuresText, setFeaturesText] = useState("");
   const [activeTab, setActiveTab] = useState("plans");
   
-  // Site Settings
   const [siteSettings, setSiteSettings] = useState<SiteSettings>({
     get_started_url: "",
     free_server_url: "",
@@ -110,6 +147,8 @@ export default function Admin() {
   useEffect(() => {
     if (user && isAdmin) {
       fetchPlans();
+      fetchFaqs();
+      fetchSocialLinks();
       fetchSiteSettings();
     }
   }, [user, isAdmin]);
@@ -129,6 +168,16 @@ export default function Admin() {
     setLoadingPlans(false);
   };
 
+  const fetchFaqs = async () => {
+    const { data } = await supabase.from("faqs").select("*").order("sort_order", { ascending: true });
+    if (data) setFaqs(data);
+  };
+
+  const fetchSocialLinks = async () => {
+    const { data } = await supabase.from("social_links").select("*").order("sort_order", { ascending: true });
+    if (data) setSocialLinks(data);
+  };
+
   const fetchSiteSettings = async () => {
     const { data } = await supabase.from("site_settings").select("*");
     if (data) {
@@ -140,15 +189,18 @@ export default function Admin() {
     }
   };
 
+  // Plan handlers
   const handleCreatePlan = () => {
     setEditingPlan({ ...emptyPlan, id: "", category: activeCategory } as Plan);
     setFeaturesText("");
+    setDialogType("plan");
     setIsDialogOpen(true);
   };
 
   const handleEditPlan = (plan: Plan) => {
     setEditingPlan(plan);
     setFeaturesText(plan.features.join("\n"));
+    setDialogType("plan");
     setIsDialogOpen(true);
   };
 
@@ -220,9 +272,7 @@ export default function Admin() {
 
   const handleDeletePlan = async (planId: string) => {
     if (!confirm("Are you sure you want to delete this plan?")) return;
-
     const { error } = await supabase.from("hosting_plans").delete().eq("id", planId);
-
     if (error) {
       toast({ variant: "destructive", title: "Error", description: "Failed to delete plan" });
     } else {
@@ -232,15 +282,139 @@ export default function Admin() {
   };
 
   const handleToggleEnabled = async (plan: Plan) => {
-    const { error } = await supabase
-      .from("hosting_plans")
-      .update({ enabled: !plan.enabled })
-      .eq("id", plan.id);
-
+    const { error } = await supabase.from("hosting_plans").update({ enabled: !plan.enabled }).eq("id", plan.id);
     if (error) {
       toast({ variant: "destructive", title: "Error", description: "Failed to update plan" });
     } else {
       fetchPlans();
+    }
+  };
+
+  // FAQ handlers
+  const handleCreateFaq = () => {
+    setEditingFaq({ ...emptyFaq, id: "" } as FAQ);
+    setDialogType("faq");
+    setIsDialogOpen(true);
+  };
+
+  const handleEditFaq = (faq: FAQ) => {
+    setEditingFaq(faq);
+    setDialogType("faq");
+    setIsDialogOpen(true);
+  };
+
+  const handleSaveFaq = async () => {
+    if (!editingFaq) return;
+    setIsSaving(true);
+
+    if (editingFaq.id) {
+      const { error } = await supabase.from("faqs").update({
+        question: editingFaq.question,
+        answer: editingFaq.answer,
+        sort_order: editingFaq.sort_order,
+        enabled: editingFaq.enabled,
+      }).eq("id", editingFaq.id);
+
+      if (error) {
+        toast({ variant: "destructive", title: "Error", description: "Failed to update FAQ" });
+      } else {
+        toast({ title: "Success", description: "FAQ updated successfully" });
+        fetchFaqs();
+      }
+    } else {
+      const { error } = await supabase.from("faqs").insert({
+        question: editingFaq.question,
+        answer: editingFaq.answer,
+        sort_order: editingFaq.sort_order,
+        enabled: editingFaq.enabled,
+      });
+
+      if (error) {
+        toast({ variant: "destructive", title: "Error", description: "Failed to create FAQ" });
+      } else {
+        toast({ title: "Success", description: "FAQ created successfully" });
+        fetchFaqs();
+      }
+    }
+
+    setIsSaving(false);
+    setIsDialogOpen(false);
+    setEditingFaq(null);
+  };
+
+  const handleDeleteFaq = async (faqId: string) => {
+    if (!confirm("Are you sure you want to delete this FAQ?")) return;
+    const { error } = await supabase.from("faqs").delete().eq("id", faqId);
+    if (error) {
+      toast({ variant: "destructive", title: "Error", description: "Failed to delete FAQ" });
+    } else {
+      toast({ title: "Success", description: "FAQ deleted successfully" });
+      fetchFaqs();
+    }
+  };
+
+  // Social Link handlers
+  const handleCreateSocialLink = () => {
+    setEditingSocialLink({ ...emptySocialLink, id: "" } as SocialLink);
+    setDialogType("social");
+    setIsDialogOpen(true);
+  };
+
+  const handleEditSocialLink = (link: SocialLink) => {
+    setEditingSocialLink(link);
+    setDialogType("social");
+    setIsDialogOpen(true);
+  };
+
+  const handleSaveSocialLink = async () => {
+    if (!editingSocialLink) return;
+    setIsSaving(true);
+
+    if (editingSocialLink.id) {
+      const { error } = await supabase.from("social_links").update({
+        platform: editingSocialLink.platform,
+        url: editingSocialLink.url,
+        icon: editingSocialLink.icon,
+        sort_order: editingSocialLink.sort_order,
+        enabled: editingSocialLink.enabled,
+      }).eq("id", editingSocialLink.id);
+
+      if (error) {
+        toast({ variant: "destructive", title: "Error", description: "Failed to update social link" });
+      } else {
+        toast({ title: "Success", description: "Social link updated successfully" });
+        fetchSocialLinks();
+      }
+    } else {
+      const { error } = await supabase.from("social_links").insert({
+        platform: editingSocialLink.platform,
+        url: editingSocialLink.url,
+        icon: editingSocialLink.icon,
+        sort_order: editingSocialLink.sort_order,
+        enabled: editingSocialLink.enabled,
+      });
+
+      if (error) {
+        toast({ variant: "destructive", title: "Error", description: "Failed to create social link" });
+      } else {
+        toast({ title: "Success", description: "Social link created successfully" });
+        fetchSocialLinks();
+      }
+    }
+
+    setIsSaving(false);
+    setIsDialogOpen(false);
+    setEditingSocialLink(null);
+  };
+
+  const handleDeleteSocialLink = async (linkId: string) => {
+    if (!confirm("Are you sure you want to delete this social link?")) return;
+    const { error } = await supabase.from("social_links").delete().eq("id", linkId);
+    if (error) {
+      toast({ variant: "destructive", title: "Error", description: "Failed to delete social link" });
+    } else {
+      toast({ title: "Success", description: "Social link deleted successfully" });
+      fetchSocialLinks();
     }
   };
 
@@ -349,17 +523,24 @@ export default function Admin() {
           <TabsList className="bg-card/50 border border-border/50">
             <TabsTrigger value="plans" className="data-[state=active]:bg-primary">
               <Gamepad2 className="w-4 h-4 mr-2" />
-              Hosting Plans
+              Plans
+            </TabsTrigger>
+            <TabsTrigger value="faqs" className="data-[state=active]:bg-primary">
+              <HelpCircle className="w-4 h-4 mr-2" />
+              FAQs
+            </TabsTrigger>
+            <TabsTrigger value="social" className="data-[state=active]:bg-primary">
+              <LinkIcon className="w-4 h-4 mr-2" />
+              Social
             </TabsTrigger>
             <TabsTrigger value="settings" className="data-[state=active]:bg-primary">
               <Settings className="w-4 h-4 mr-2" />
-              Site Settings
+              Settings
             </TabsTrigger>
           </TabsList>
 
           {/* Plans Tab */}
           <TabsContent value="plans" className="space-y-6">
-            {/* Category Tabs */}
             <div className="flex flex-wrap gap-3">
               {(Object.keys(categoryNames) as Category[]).map((cat) => (
                 <button
@@ -380,7 +561,6 @@ export default function Admin() {
               ))}
             </div>
 
-            {/* Actions */}
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">{categoryNames[activeCategory]} Plans</h2>
               <Button onClick={handleCreatePlan}>
@@ -389,7 +569,6 @@ export default function Admin() {
               </Button>
             </div>
 
-            {/* Plans Grid */}
             {loadingPlans ? (
               <div className="flex justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -403,15 +582,8 @@ export default function Admin() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredPlans.map((plan) => (
-                  <Card
-                    key={plan.id}
-                    className={`bg-card/50 border-border/50 relative ${
-                      !plan.enabled ? "opacity-60" : ""
-                    }`}
-                  >
-                    {plan.popular && (
-                      <Badge className="absolute top-2 right-2 bg-primary">Popular</Badge>
-                    )}
+                  <Card key={plan.id} className={`bg-card/50 border-border/50 relative ${!plan.enabled ? "opacity-60" : ""}`}>
+                    {plan.popular && <Badge className="absolute top-2 right-2 bg-primary">Popular</Badge>}
                     {plan.image_url && (
                       <div className="h-32 overflow-hidden rounded-t-lg">
                         <img src={plan.image_url} alt={plan.name} className="w-full h-full object-cover" />
@@ -420,10 +592,7 @@ export default function Admin() {
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg">{plan.name}</CardTitle>
-                        <Switch
-                          checked={plan.enabled}
-                          onCheckedChange={() => handleToggleEnabled(plan)}
-                        />
+                        <Switch checked={plan.enabled} onCheckedChange={() => handleToggleEnabled(plan)} />
                       </div>
                       <div className="flex items-baseline gap-1">
                         <span className="text-2xl font-bold text-primary">${plan.price}</span>
@@ -453,18 +622,8 @@ export default function Admin() {
                           <span>{plan.bandwidth}</span>
                         </div>
                       </div>
-
-                      <div className="text-xs text-muted-foreground truncate">
-                        URL: {plan.redirect_url}
-                      </div>
-
                       <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => handleEditPlan(plan)}
-                        >
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEditPlan(plan)}>
                           <Pencil className="w-3 h-3 mr-1" />
                           Edit
                         </Button>
@@ -484,10 +643,109 @@ export default function Admin() {
             )}
           </TabsContent>
 
+          {/* FAQs Tab */}
+          <TabsContent value="faqs" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Manage FAQs</h2>
+              <Button onClick={handleCreateFaq}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add FAQ
+              </Button>
+            </div>
+
+            {faqs.length === 0 ? (
+              <Card className="bg-card/50 border-border/50">
+                <CardContent className="py-12 text-center">
+                  <p className="text-muted-foreground">No FAQs found. Add your first FAQ!</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {faqs.map((faq) => (
+                  <Card key={faq.id} className={`bg-card/50 border-border/50 ${!faq.enabled ? "opacity-60" : ""}`}>
+                    <CardContent className="py-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <h4 className="font-medium mb-1">{faq.question}</h4>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{faq.answer}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">#{faq.sort_order}</Badge>
+                          <Button variant="outline" size="sm" onClick={() => handleEditFaq(faq)}>
+                            <Pencil className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                            onClick={() => handleDeleteFaq(faq.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Social Links Tab */}
+          <TabsContent value="social" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Social Links</h2>
+              <Button onClick={handleCreateSocialLink}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Link
+              </Button>
+            </div>
+
+            {socialLinks.length === 0 ? (
+              <Card className="bg-card/50 border-border/50">
+                <CardContent className="py-12 text-center">
+                  <p className="text-muted-foreground">No social links found. Add your first link!</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {socialLinks.map((link) => (
+                  <Card key={link.id} className={`bg-card/50 border-border/50 ${!link.enabled ? "opacity-60" : ""}`}>
+                    <CardContent className="py-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                            <span className="text-primary text-sm font-medium">{link.icon.charAt(0).toUpperCase()}</span>
+                          </div>
+                          <div>
+                            <h4 className="font-medium">{link.platform}</h4>
+                            <p className="text-xs text-muted-foreground truncate max-w-[150px]">{link.url}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" onClick={() => handleEditSocialLink(link)}>
+                            <Pencil className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                            onClick={() => handleDeleteSocialLink(link.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
-              {/* Button URLs */}
               <Card className="bg-card/50 border-border/50">
                 <CardHeader>
                   <CardTitle className="text-lg">Button URLs</CardTitle>
@@ -522,7 +780,6 @@ export default function Admin() {
                 </CardContent>
               </Card>
 
-              {/* Logo Upload */}
               <Card className="bg-card/50 border-border/50">
                 <CardHeader>
                   <CardTitle className="text-lg">Site Logo</CardTitle>
@@ -569,7 +826,6 @@ export default function Admin() {
                 </CardContent>
               </Card>
 
-              {/* Panel Preview Upload */}
               <Card className="bg-card/50 border-border/50 lg:col-span-2">
                 <CardHeader>
                   <CardTitle className="text-lg">Panel Preview Image</CardTitle>
@@ -610,9 +866,6 @@ export default function Admin() {
                           </span>
                         </Button>
                       </label>
-                      <p className="text-xs text-muted-foreground">
-                        This image will be displayed in the Solutions section.
-                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -621,11 +874,7 @@ export default function Admin() {
 
             <div className="flex justify-end">
               <Button onClick={handleSaveSettings} disabled={savingSettings}>
-                {savingSettings ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4 mr-2" />
-                )}
+                {savingSettings ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                 Save Settings
               </Button>
             </div>
@@ -633,34 +882,31 @@ export default function Admin() {
         </Tabs>
       </main>
 
-      {/* Edit/Create Dialog */}
+      {/* Dialogs */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
           <DialogHeader>
             <DialogTitle>
-              {editingPlan?.id ? "Edit Plan" : "Create New Plan"}
+              {dialogType === "plan" && (editingPlan?.id ? "Edit Plan" : "Create New Plan")}
+              {dialogType === "faq" && (editingFaq?.id ? "Edit FAQ" : "Create New FAQ")}
+              {dialogType === "social" && (editingSocialLink?.id ? "Edit Social Link" : "Create New Social Link")}
             </DialogTitle>
           </DialogHeader>
 
-          {editingPlan && (
+          {/* Plan Dialog */}
+          {dialogType === "plan" && editingPlan && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Plan Name</label>
-                  <Input
-                    value={editingPlan.name}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })}
-                    placeholder="e.g., Starter"
-                  />
+                  <Input value={editingPlan.name} onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })} placeholder="e.g., Starter" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Category</label>
                   <select
                     className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                     value={editingPlan.category}
-                    onChange={(e) =>
-                      setEditingPlan({ ...editingPlan, category: e.target.value as Category })
-                    }
+                    onChange={(e) => setEditingPlan({ ...editingPlan, category: e.target.value as Category })}
                     disabled={!!editingPlan.id}
                   >
                     <option value="game">Game Hosting</option>
@@ -674,85 +920,45 @@ export default function Admin() {
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium">Price ($)</label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={editingPlan.price}
-                    onChange={(e) =>
-                      setEditingPlan({ ...editingPlan, price: parseFloat(e.target.value) || 0 })
-                    }
-                  />
+                  <Input type="number" step="0.01" value={editingPlan.price} onChange={(e) => setEditingPlan({ ...editingPlan, price: parseFloat(e.target.value) || 0 })} />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Billing Cycle</label>
-                  <select
-                    className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
-                    value={editingPlan.billing_cycle}
-                    onChange={(e) =>
-                      setEditingPlan({ ...editingPlan, billing_cycle: e.target.value })
-                    }
-                  >
+                  <select className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm" value={editingPlan.billing_cycle} onChange={(e) => setEditingPlan({ ...editingPlan, billing_cycle: e.target.value })}>
                     <option value="month">Monthly</option>
                     <option value="year">Yearly</option>
                   </select>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Sort Order</label>
-                  <Input
-                    type="number"
-                    value={editingPlan.sort_order}
-                    onChange={(e) =>
-                      setEditingPlan({ ...editingPlan, sort_order: parseInt(e.target.value) || 0 })
-                    }
-                  />
+                  <Input type="number" value={editingPlan.sort_order} onChange={(e) => setEditingPlan({ ...editingPlan, sort_order: parseInt(e.target.value) || 0 })} />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">RAM</label>
-                  <Input
-                    value={editingPlan.ram}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, ram: e.target.value })}
-                    placeholder="e.g., 2GB"
-                  />
+                  <Input value={editingPlan.ram} onChange={(e) => setEditingPlan({ ...editingPlan, ram: e.target.value })} placeholder="e.g., 2GB" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">CPU</label>
-                  <Input
-                    value={editingPlan.cpu}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, cpu: e.target.value })}
-                    placeholder="e.g., 2 vCores"
-                  />
+                  <Input value={editingPlan.cpu} onChange={(e) => setEditingPlan({ ...editingPlan, cpu: e.target.value })} placeholder="e.g., 2 vCores" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Storage</label>
-                  <Input
-                    value={editingPlan.storage}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, storage: e.target.value })}
-                    placeholder="e.g., 20GB SSD"
-                  />
+                  <Input value={editingPlan.storage} onChange={(e) => setEditingPlan({ ...editingPlan, storage: e.target.value })} placeholder="e.g., 20GB SSD" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Bandwidth</label>
-                  <Input
-                    value={editingPlan.bandwidth}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, bandwidth: e.target.value })}
-                    placeholder="e.g., Unlimited"
-                  />
+                  <Input value={editingPlan.bandwidth} onChange={(e) => setEditingPlan({ ...editingPlan, bandwidth: e.target.value })} placeholder="e.g., Unlimited" />
                 </div>
               </div>
 
               <div>
                 <label className="text-sm font-medium">Redirect URL</label>
-                <Input
-                  value={editingPlan.redirect_url}
-                  onChange={(e) => setEditingPlan({ ...editingPlan, redirect_url: e.target.value })}
-                  placeholder="https://billing.kinetichost.space/..."
-                />
+                <Input value={editingPlan.redirect_url} onChange={(e) => setEditingPlan({ ...editingPlan, redirect_url: e.target.value })} placeholder="https://billing.kinetichost.space/..." />
               </div>
 
-              {/* Plan Image Upload */}
               <div>
                 <label className="text-sm font-medium">Plan Image</label>
                 <div className="flex items-center gap-4 mt-2">
@@ -764,28 +970,12 @@ export default function Admin() {
                     </div>
                   )}
                   <div className="flex-1 space-y-2">
-                    <Input
-                      value={editingPlan.image_url || ""}
-                      onChange={(e) => setEditingPlan({ ...editingPlan, image_url: e.target.value })}
-                      placeholder="Image URL"
-                    />
+                    <Input value={editingPlan.image_url || ""} onChange={(e) => setEditingPlan({ ...editingPlan, image_url: e.target.value })} placeholder="Image URL" />
                     <label className="cursor-pointer inline-block">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleImageUpload(file, "plan", editingPlan.id);
-                        }}
-                      />
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, "plan", editingPlan.id); }} />
                       <Button variant="outline" size="sm" asChild disabled={uploadingImage === editingPlan.id}>
                         <span>
-                          {uploadingImage === editingPlan.id ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <Upload className="w-4 h-4 mr-2" />
-                          )}
+                          {uploadingImage === editingPlan.id ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
                           Upload Image
                         </span>
                       </Button>
@@ -796,47 +986,98 @@ export default function Admin() {
 
               <div>
                 <label className="text-sm font-medium">Features (one per line)</label>
-                <textarea
-                  className="w-full min-h-[120px] px-3 py-2 rounded-md border border-input bg-background text-sm"
-                  value={featuresText}
-                  onChange={(e) => setFeaturesText(e.target.value)}
-                  placeholder="DDoS Protection&#10;Instant Setup&#10;24/7 Support"
-                />
+                <textarea className="w-full min-h-[120px] px-3 py-2 rounded-md border border-input bg-background text-sm" value={featuresText} onChange={(e) => setFeaturesText(e.target.value)} placeholder="DDoS Protection&#10;Instant Setup&#10;24/7 Support" />
               </div>
 
               <div className="flex items-center gap-6">
                 <label className="flex items-center gap-2">
-                  <Switch
-                    checked={editingPlan.popular}
-                    onCheckedChange={(checked) =>
-                      setEditingPlan({ ...editingPlan, popular: checked })
-                    }
-                  />
+                  <Switch checked={editingPlan.popular} onCheckedChange={(checked) => setEditingPlan({ ...editingPlan, popular: checked })} />
                   <span className="text-sm">Popular</span>
                 </label>
                 <label className="flex items-center gap-2">
-                  <Switch
-                    checked={editingPlan.enabled}
-                    onCheckedChange={(checked) =>
-                      setEditingPlan({ ...editingPlan, enabled: checked })
-                    }
-                  />
+                  <Switch checked={editingPlan.enabled} onCheckedChange={(checked) => setEditingPlan({ ...editingPlan, enabled: checked })} />
                   <span className="text-sm">Enabled</span>
                 </label>
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}><X className="w-4 h-4 mr-2" />Cancel</Button>
                 <Button onClick={handleSavePlan} disabled={isSaving}>
-                  {isSaving ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4 mr-2" />
-                  )}
+                  {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                   Save Plan
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* FAQ Dialog */}
+          {dialogType === "faq" && editingFaq && (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Question</label>
+                <Input value={editingFaq.question} onChange={(e) => setEditingFaq({ ...editingFaq, question: e.target.value })} placeholder="Enter the FAQ question" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Answer</label>
+                <textarea className="w-full min-h-[120px] px-3 py-2 rounded-md border border-input bg-background text-sm" value={editingFaq.answer} onChange={(e) => setEditingFaq({ ...editingFaq, answer: e.target.value })} placeholder="Enter the FAQ answer" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Sort Order</label>
+                  <Input type="number" value={editingFaq.sort_order} onChange={(e) => setEditingFaq({ ...editingFaq, sort_order: parseInt(e.target.value) || 0 })} />
+                </div>
+                <div className="flex items-center gap-2 pt-6">
+                  <Switch checked={editingFaq.enabled} onCheckedChange={(checked) => setEditingFaq({ ...editingFaq, enabled: checked })} />
+                  <span className="text-sm">Enabled</span>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}><X className="w-4 h-4 mr-2" />Cancel</Button>
+                <Button onClick={handleSaveFaq} disabled={isSaving}>
+                  {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  Save FAQ
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Social Link Dialog */}
+          {dialogType === "social" && editingSocialLink && (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Platform Name</label>
+                <Input value={editingSocialLink.platform} onChange={(e) => setEditingSocialLink({ ...editingSocialLink, platform: e.target.value })} placeholder="e.g., Discord, Twitter" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">URL</label>
+                <Input value={editingSocialLink.url} onChange={(e) => setEditingSocialLink({ ...editingSocialLink, url: e.target.value })} placeholder="https://..." />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Icon</label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm" value={editingSocialLink.icon} onChange={(e) => setEditingSocialLink({ ...editingSocialLink, icon: e.target.value })}>
+                  <option value="discord">Discord</option>
+                  <option value="twitter">Twitter</option>
+                  <option value="github">GitHub</option>
+                  <option value="youtube">YouTube</option>
+                  <option value="linkedin">LinkedIn</option>
+                  <option value="instagram">Instagram</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Sort Order</label>
+                  <Input type="number" value={editingSocialLink.sort_order} onChange={(e) => setEditingSocialLink({ ...editingSocialLink, sort_order: parseInt(e.target.value) || 0 })} />
+                </div>
+                <div className="flex items-center gap-2 pt-6">
+                  <Switch checked={editingSocialLink.enabled} onCheckedChange={(checked) => setEditingSocialLink({ ...editingSocialLink, enabled: checked })} />
+                  <span className="text-sm">Enabled</span>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}><X className="w-4 h-4 mr-2" />Cancel</Button>
+                <Button onClick={handleSaveSocialLink} disabled={isSaving}>
+                  {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  Save Link
                 </Button>
               </div>
             </div>

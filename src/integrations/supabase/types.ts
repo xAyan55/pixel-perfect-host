@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      faqs: {
+        Row: {
+          answer: string
+          created_at: string
+          enabled: boolean | null
+          id: string
+          question: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          enabled?: boolean | null
+          id?: string
+          question: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          enabled?: boolean | null
+          id?: string
+          question?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hosting_plans: {
         Row: {
           bandwidth: string
@@ -95,6 +125,39 @@ export type Database = {
           setting_key?: string
           setting_value?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      social_links: {
+        Row: {
+          created_at: string
+          enabled: boolean | null
+          icon: string
+          id: string
+          platform: string
+          sort_order: number | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean | null
+          icon: string
+          id?: string
+          platform: string
+          sort_order?: number | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean | null
+          icon?: string
+          id?: string
+          platform?: string
+          sort_order?: number | null
+          updated_at?: string
+          url?: string
         }
         Relationships: []
       }
