@@ -41,6 +41,7 @@ interface SiteSettings {
   free_server_enabled: string;
   logo_url: string;
   panel_preview_url: string;
+  control_panel_url: string;
 }
 
 const categoryIcons = {
@@ -95,6 +96,7 @@ export default function Admin() {
     free_server_enabled: "true",
     logo_url: "",
     panel_preview_url: "",
+    control_panel_url: "",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
@@ -492,12 +494,13 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium">Let's Get Started Button URL</label>
+                    <label className="text-sm font-medium">Control Panel URL</label>
                     <Input
-                      value={siteSettings.get_started_url}
-                      onChange={(e) => setSiteSettings({ ...siteSettings, get_started_url: e.target.value })}
-                      placeholder="https://billing.example.com"
+                      value={siteSettings.control_panel_url}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, control_panel_url: e.target.value })}
+                      placeholder="https://panel.example.com"
                     />
+                    <p className="text-xs text-muted-foreground mt-1">URL for the Control Panel button in navbar</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium">Free Server Button URL</label>

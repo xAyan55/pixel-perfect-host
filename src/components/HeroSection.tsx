@@ -1,10 +1,10 @@
 import { ArrowRight, ChevronRight, Gift } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import heroCharacter from "@/assets/hero-character.png";
 
 interface SiteSettings {
-  get_started_url: string;
   free_server_url: string;
   free_server_enabled: string;
   logo_url: string;
@@ -13,7 +13,6 @@ interface SiteSettings {
 
 export const HeroSection = () => {
   const [settings, setSettings] = useState<SiteSettings>({
-    get_started_url: "#solutions",
     free_server_url: "#",
     free_server_enabled: "true",
     logo_url: "",
@@ -60,10 +59,10 @@ export const HeroSection = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 opacity-0 animate-fade-in animation-delay-200">
-              <a href={settings.get_started_url} className="btn-primary group">
+              <Link to="/get-started" className="btn-primary group">
                 Let's Get Started
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </a>
+              </Link>
               <a href="#about" className="btn-secondary group">
                 About Us
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
