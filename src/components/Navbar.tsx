@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Terminal } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -12,7 +13,23 @@ const navLinks = [
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [controlPanelUrl, setControlPanelUrl] = useState("#");
   const location = useLocation();
+
+  useEffect(() => {
+    const fetchControlPanelUrl = async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("setting_value")
+        .eq("setting_key", "control_panel_url")
+        .single();
+      
+      if (data?.setting_value) {
+        setControlPanelUrl(data.setting_value);
+      }
+    };
+    fetchControlPanelUrl();
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
@@ -48,10 +65,15 @@ export const Navbar = () => {
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-4">
-            <Link to="/admin/login" className="btn-outline text-sm py-2">
+            <a 
+              href={controlPanelUrl} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="btn-outline text-sm py-2"
+            >
               <Terminal className="w-4 h-4" />
               Control Panel
-            </Link>
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -77,10 +99,16 @@ export const Navbar = () => {
                   {link.name}
                 </Link>
               ))}
-              <Link to="/admin/login" className="btn-primary w-fit mt-2" onClick={() => setIsOpen(false)}>
+              <a 
+                href={controlPanelUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn-primary w-fit mt-2" 
+                onClick={() => setIsOpen(false)}
+              >
                 <Terminal className="w-4 h-4" />
                 Control Panel
-              </Link>
+              </a>
             </div>
           </div>
         )}
