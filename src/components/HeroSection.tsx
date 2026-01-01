@@ -59,7 +59,7 @@ export const HeroSection = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 opacity-0 animate-fade-in animation-delay-200">
-              <Link to="/get-started" className="btn-primary group">
+              <Link to="/game-servers" className="btn-primary group">
                 Let's Get Started
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
