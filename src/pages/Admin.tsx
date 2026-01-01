@@ -60,6 +60,9 @@ interface SiteSettings {
   logo_url: string;
   panel_preview_url: string;
   control_panel_url: string;
+  featured_banner_title: string;
+  featured_banner_subtitle: string;
+  featured_banner_image_url: string;
 }
 
 const categoryIcons = {
@@ -134,6 +137,9 @@ export default function Admin() {
     logo_url: "",
     panel_preview_url: "",
     control_panel_url: "",
+    featured_banner_title: "UPDATE AVAILABLE",
+    featured_banner_subtitle: "Featured Server",
+    featured_banner_image_url: "",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
@@ -439,7 +445,7 @@ export default function Admin() {
 
   const handleImageUpload = async (
     file: File, 
-    type: "logo" | "panel_preview" | "plan",
+    type: "logo" | "panel_preview" | "featured_banner" | "plan",
     planId?: string
   ) => {
     setUploadingImage(type === "plan" ? planId! : type);
@@ -465,6 +471,8 @@ export default function Admin() {
       setSiteSettings((prev) => ({ ...prev, logo_url: publicUrl }));
     } else if (type === "panel_preview") {
       setSiteSettings((prev) => ({ ...prev, panel_preview_url: publicUrl }));
+    } else if (type === "featured_banner") {
+      setSiteSettings((prev) => ({ ...prev, featured_banner_image_url: publicUrl }));
     } else if (type === "plan" && editingPlan) {
       setEditingPlan({ ...editingPlan, image_url: publicUrl });
     }
@@ -866,6 +874,76 @@ export default function Admin() {
                           </span>
                         </Button>
                       </label>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Featured Banner Settings */}
+              <Card className="bg-card/50 border-border/50 lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">Featured Banner (Homepage)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    This banner appears below the hero section and showcases the plan marked as "Popular".
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">Banner Badge Text</label>
+                      <Input
+                        value={siteSettings.featured_banner_title}
+                        onChange={(e) => setSiteSettings({ ...siteSettings, featured_banner_title: e.target.value })}
+                        placeholder="UPDATE AVAILABLE"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Small badge text above the title</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Banner Title</label>
+                      <Input
+                        value={siteSettings.featured_banner_subtitle}
+                        onChange={(e) => setSiteSettings({ ...siteSettings, featured_banner_subtitle: e.target.value })}
+                        placeholder="Featured Server"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Main heading of the banner</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-4">
+                    {siteSettings.featured_banner_image_url ? (
+                      <img src={siteSettings.featured_banner_image_url} alt="Featured Banner" className="h-32 w-auto rounded object-contain" />
+                    ) : (
+                      <div className="h-32 w-32 rounded bg-muted flex items-center justify-center">
+                        <Image className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1 space-y-2">
+                      <Input
+                        value={siteSettings.featured_banner_image_url}
+                        onChange={(e) => setSiteSettings({ ...siteSettings, featured_banner_image_url: e.target.value })}
+                        placeholder="Featured Banner Image URL (optional)"
+                      />
+                      <label className="cursor-pointer inline-block">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(file, "featured_banner");
+                          }}
+                        />
+                        <Button variant="outline" size="sm" asChild disabled={uploadingImage === "featured_banner"}>
+                          <span>
+                            {uploadingImage === "featured_banner" ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <Upload className="w-4 h-4 mr-2" />
+                            )}
+                            Upload Banner Image
+                          </span>
+                        </Button>
+                      </label>
+                      <p className="text-xs text-muted-foreground">If no image is set, the popular plan's image will be used</p>
                     </div>
                   </div>
                 </CardContent>
