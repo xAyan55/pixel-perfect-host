@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   LogOut, Plus, Pencil, Trash2, Gamepad2, Cloud, Globe, Bot,
   Loader2, Save, X, HardDrive, Cpu, Wifi, Settings, Upload, Image,
-  HelpCircle, Link as LinkIcon
+  HelpCircle, Link as LinkIcon, Sparkles
 } from "lucide-react";
 
 type Category = "game" | "vps" | "web" | "bot";
@@ -53,6 +53,15 @@ interface SocialLink {
   enabled: boolean;
 }
 
+interface Feature {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  sort_order: number;
+  enabled: boolean;
+}
+
 interface SiteSettings {
   get_started_url: string;
   free_server_url: string;
@@ -63,6 +72,8 @@ interface SiteSettings {
   featured_banner_title: string;
   featured_banner_subtitle: string;
   featured_banner_image_url: string;
+  features_section_logo_url: string;
+  features_section_subtitle: string;
 }
 
 const categoryIcons = {
@@ -111,6 +122,14 @@ const emptySocialLink: Omit<SocialLink, "id"> = {
   enabled: true,
 };
 
+const emptyFeature: Omit<Feature, "id"> = {
+  title: "",
+  description: "",
+  icon: "settings",
+  sort_order: 0,
+  enabled: true,
+};
+
 export default function Admin() {
   const { user, isAdmin, isLoading, signOut } = useAuth();
   const navigate = useNavigate();
@@ -119,13 +138,15 @@ export default function Admin() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [features, setFeatures] = useState<Feature[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [activeCategory, setActiveCategory] = useState<Category>("game");
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [editingFaq, setEditingFaq] = useState<FAQ | null>(null);
   const [editingSocialLink, setEditingSocialLink] = useState<SocialLink | null>(null);
+  const [editingFeature, setEditingFeature] = useState<Feature | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<"plan" | "faq" | "social">("plan");
+  const [dialogType, setDialogType] = useState<"plan" | "faq" | "social" | "feature">("plan");
   const [isSaving, setIsSaving] = useState(false);
   const [featuresText, setFeaturesText] = useState("");
   const [activeTab, setActiveTab] = useState("plans");
@@ -140,6 +161,8 @@ export default function Admin() {
     featured_banner_title: "UPDATE AVAILABLE",
     featured_banner_subtitle: "Featured Server",
     featured_banner_image_url: "",
+    features_section_logo_url: "",
+    features_section_subtitle: "Advanced tools to manage, customize, and create your server",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
@@ -155,6 +178,7 @@ export default function Admin() {
       fetchPlans();
       fetchFaqs();
       fetchSocialLinks();
+      fetchFeatures();
       fetchSiteSettings();
     }
   }, [user, isAdmin]);
@@ -182,6 +206,11 @@ export default function Admin() {
   const fetchSocialLinks = async () => {
     const { data } = await supabase.from("social_links").select("*").order("sort_order", { ascending: true });
     if (data) setSocialLinks(data);
+  };
+
+  const fetchFeatures = async () => {
+    const { data } = await supabase.from("features").select("*").order("sort_order", { ascending: true });
+    if (data) setFeatures(data);
   };
 
   const fetchSiteSettings = async () => {
@@ -424,6 +453,71 @@ export default function Admin() {
     }
   };
 
+  // Feature handlers
+  const handleCreateFeature = () => {
+    setEditingFeature({ ...emptyFeature, id: "" } as Feature);
+    setDialogType("feature");
+    setIsDialogOpen(true);
+  };
+
+  const handleEditFeature = (feature: Feature) => {
+    setEditingFeature(feature);
+    setDialogType("feature");
+    setIsDialogOpen(true);
+  };
+
+  const handleSaveFeature = async () => {
+    if (!editingFeature) return;
+    setIsSaving(true);
+
+    if (editingFeature.id) {
+      const { error } = await supabase.from("features").update({
+        title: editingFeature.title,
+        description: editingFeature.description,
+        icon: editingFeature.icon,
+        sort_order: editingFeature.sort_order,
+        enabled: editingFeature.enabled,
+      }).eq("id", editingFeature.id);
+
+      if (error) {
+        toast({ variant: "destructive", title: "Error", description: "Failed to update feature" });
+      } else {
+        toast({ title: "Success", description: "Feature updated successfully" });
+        fetchFeatures();
+      }
+    } else {
+      const { error } = await supabase.from("features").insert({
+        title: editingFeature.title,
+        description: editingFeature.description,
+        icon: editingFeature.icon,
+        sort_order: editingFeature.sort_order,
+        enabled: editingFeature.enabled,
+      });
+
+      if (error) {
+        toast({ variant: "destructive", title: "Error", description: "Failed to create feature" });
+      } else {
+        toast({ title: "Success", description: "Feature created successfully" });
+        fetchFeatures();
+      }
+    }
+
+    setIsSaving(false);
+    setIsDialogOpen(false);
+    setEditingFeature(null);
+  };
+
+  const handleDeleteFeature = async (featureId: string) => {
+    if (!confirm("Are you sure you want to delete this feature?")) return;
+    const { error } = await supabase.from("features").delete().eq("id", featureId);
+    if (error) {
+      toast({ variant: "destructive", title: "Error", description: "Failed to delete feature" });
+    } else {
+      toast({ title: "Success", description: "Feature deleted successfully" });
+      fetchFeatures();
+    }
+  };
+
   const handleSaveSettings = async () => {
     setSavingSettings(true);
     
@@ -445,7 +539,7 @@ export default function Admin() {
 
   const handleImageUpload = async (
     file: File, 
-    type: "logo" | "panel_preview" | "featured_banner" | "plan",
+    type: "logo" | "panel_preview" | "featured_banner" | "features_section_logo" | "plan",
     planId?: string
   ) => {
     setUploadingImage(type === "plan" ? planId! : type);
@@ -473,6 +567,8 @@ export default function Admin() {
       setSiteSettings((prev) => ({ ...prev, panel_preview_url: publicUrl }));
     } else if (type === "featured_banner") {
       setSiteSettings((prev) => ({ ...prev, featured_banner_image_url: publicUrl }));
+    } else if (type === "features_section_logo") {
+      setSiteSettings((prev) => ({ ...prev, features_section_logo_url: publicUrl }));
     } else if (type === "plan" && editingPlan) {
       setEditingPlan({ ...editingPlan, image_url: publicUrl });
     }
@@ -528,10 +624,14 @@ export default function Admin() {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-card/50 border border-border/50">
+          <TabsList className="bg-card/50 border border-border/50 flex-wrap">
             <TabsTrigger value="plans" className="data-[state=active]:bg-primary">
               <Gamepad2 className="w-4 h-4 mr-2" />
               Plans
+            </TabsTrigger>
+            <TabsTrigger value="features" className="data-[state=active]:bg-primary">
+              <Sparkles className="w-4 h-4 mr-2" />
+              Features
             </TabsTrigger>
             <TabsTrigger value="faqs" className="data-[state=active]:bg-primary">
               <HelpCircle className="w-4 h-4 mr-2" />
@@ -643,6 +743,57 @@ export default function Admin() {
                         >
                           <Trash2 className="w-3 h-3" />
                         </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Features Tab */}
+          <TabsContent value="features" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Manage Features</h2>
+              <Button onClick={handleCreateFeature}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Feature
+              </Button>
+            </div>
+
+            {features.length === 0 ? (
+              <Card className="bg-card/50 border-border/50">
+                <CardContent className="py-12 text-center">
+                  <p className="text-muted-foreground">No features found. Add your first feature!</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {features.map((feature) => (
+                  <Card key={feature.id} className={`bg-card/50 border-border/50 ${!feature.enabled ? "opacity-60" : ""}`}>
+                    <CardContent className="py-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="secondary">#{feature.sort_order}</Badge>
+                            <Badge variant="outline">{feature.icon}</Badge>
+                          </div>
+                          <h4 className="font-medium mb-1">{feature.title}</h4>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{feature.description}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" onClick={() => handleEditFeature(feature)}>
+                            <Pencil className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                            onClick={() => handleDeleteFeature(feature.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -948,6 +1099,61 @@ export default function Admin() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Features Section Settings */}
+              <Card className="bg-card/50 border-border/50 lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">Features Section (Homepage)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Section Subtitle</label>
+                    <Input
+                      value={siteSettings.features_section_subtitle}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, features_section_subtitle: e.target.value })}
+                      placeholder="Advanced tools to manage, customize, and create your server"
+                    />
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-4">
+                    {siteSettings.features_section_logo_url ? (
+                      <img src={siteSettings.features_section_logo_url} alt="Features Logo" className="h-20 w-20 rounded object-contain" />
+                    ) : (
+                      <div className="h-20 w-20 rounded bg-muted flex items-center justify-center">
+                        <Image className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1 space-y-2">
+                      <Input
+                        value={siteSettings.features_section_logo_url}
+                        onChange={(e) => setSiteSettings({ ...siteSettings, features_section_logo_url: e.target.value })}
+                        placeholder="Center Logo URL (optional)"
+                      />
+                      <label className="cursor-pointer inline-block">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(file, "features_section_logo");
+                          }}
+                        />
+                        <Button variant="outline" size="sm" asChild disabled={uploadingImage === "features_section_logo"}>
+                          <span>
+                            {uploadingImage === "features_section_logo" ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <Upload className="w-4 h-4 mr-2" />
+                            )}
+                            Upload Logo
+                          </span>
+                        </Button>
+                      </label>
+                      <p className="text-xs text-muted-foreground">Logo displayed in the center of the features grid</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             <div className="flex justify-end">
@@ -968,6 +1174,7 @@ export default function Admin() {
               {dialogType === "plan" && (editingPlan?.id ? "Edit Plan" : "Create New Plan")}
               {dialogType === "faq" && (editingFaq?.id ? "Edit FAQ" : "Create New FAQ")}
               {dialogType === "social" && (editingSocialLink?.id ? "Edit Social Link" : "Create New Social Link")}
+              {dialogType === "feature" && (editingFeature?.id ? "Edit Feature" : "Create New Feature")}
             </DialogTitle>
           </DialogHeader>
 
@@ -1156,6 +1363,64 @@ export default function Admin() {
                 <Button onClick={handleSaveSocialLink} disabled={isSaving}>
                   {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                   Save Link
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Feature Dialog */}
+          {dialogType === "feature" && editingFeature && (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Title</label>
+                <Input value={editingFeature.title} onChange={(e) => setEditingFeature({ ...editingFeature, title: e.target.value })} placeholder="Enter the feature title" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <textarea className="w-full min-h-[80px] px-3 py-2 rounded-md border border-input bg-background text-sm" value={editingFeature.description} onChange={(e) => setEditingFeature({ ...editingFeature, description: e.target.value })} placeholder="Enter the feature description" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Icon</label>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                    value={editingFeature.icon}
+                    onChange={(e) => setEditingFeature({ ...editingFeature, icon: e.target.value })}
+                  >
+                    <option value="settings">Settings</option>
+                    <option value="puzzle">Puzzle</option>
+                    <option value="book">Book</option>
+                    <option value="package">Package</option>
+                    <option value="save">Save</option>
+                    <option value="layers">Layers</option>
+                    <option value="refresh-cw">Refresh</option>
+                    <option value="wrench">Wrench</option>
+                    <option value="shield">Shield</option>
+                    <option value="cpu">CPU</option>
+                    <option value="wifi">WiFi</option>
+                    <option value="map-pin">Map Pin</option>
+                    <option value="headphones">Headphones</option>
+                    <option value="eye">Eye</option>
+                    <option value="database">Database</option>
+                    <option value="cloud">Cloud</option>
+                    <option value="zap">Zap</option>
+                    <option value="lock">Lock</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Sort Order</label>
+                  <Input type="number" value={editingFeature.sort_order} onChange={(e) => setEditingFeature({ ...editingFeature, sort_order: parseInt(e.target.value) || 0 })} />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={editingFeature.enabled} onCheckedChange={(checked) => setEditingFeature({ ...editingFeature, enabled: checked })} />
+                <span className="text-sm">Enabled</span>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}><X className="w-4 h-4 mr-2" />Cancel</Button>
+                <Button onClick={handleSaveFeature} disabled={isSaving}>
+                  {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  Save Feature
                 </Button>
               </div>
             </div>
