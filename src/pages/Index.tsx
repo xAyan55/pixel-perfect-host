@@ -1,11 +1,12 @@
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
-import { FeaturedBanner } from "@/components/FeaturedBanner";
-import { SolutionsSection } from "@/components/SolutionsSection";
-import { FeaturesSection } from "@/components/FeaturesSection";
-import { CTASection } from "@/components/CTASection";
 import { FAQSection } from "@/components/FAQSection";
+import { FeaturedBanner } from "@/components/FeaturedBanner";
+import { FeaturesSection } from "@/components/FeaturesSection";
+import { SolutionsSection } from "@/components/SolutionsSection";
+import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
+import { AdminButton } from "@/components/AdminButton";
 
 const Index = () => {
   return (
@@ -13,13 +14,14 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
-        <FeaturedBanner />
-        <SolutionsSection />
-        <FeaturesSection />
-        <CTASection />
         <FAQSection />
+        <FeaturedBanner />
+        <FeaturesSection />
+        <SolutionsSection />
+        <CTASection />
       </main>
       <Footer />
+      <AdminButton />
     </div>
   );
 };
