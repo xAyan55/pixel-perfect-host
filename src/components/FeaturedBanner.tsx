@@ -69,28 +69,35 @@ export const FeaturedBanner = () => {
   return (
     <section className="py-16 relative overflow-hidden">
       <div className="container mx-auto px-6">
-        <div className="relative rounded-2xl border border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden">
-          {/* Background gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-violet-500/10" />
+        <div className="relative rounded-2xl border border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden group">
+          {/* Animated background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-violet-500/10 bg-[length:200%_200%] animate-gradient-shift" />
+          
+          {/* Floating orbs */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse-glow" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-violet-500/10 rounded-full blur-2xl animate-float-slow" />
           
           <div className="relative p-8 md:p-12 grid md:grid-cols-2 gap-8 items-center">
             {/* Left - Banner Image */}
             <div className="relative flex justify-center">
+              {/* Glow behind image */}
+              <div className="absolute inset-0 bg-primary/20 blur-[60px] animate-pulse-glow" />
+              
               {settings.featured_banner_image_url ? (
                 <img 
                   src={settings.featured_banner_image_url} 
                   alt="Featured" 
-                  className="max-h-64 object-contain"
+                  className="max-h-64 object-contain relative z-10 animate-float drop-shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-transform duration-500 hover:scale-105"
                 />
               ) : popularPlan.image_url ? (
                 <img 
                   src={popularPlan.image_url} 
                   alt={popularPlan.name} 
-                  className="max-h-64 object-contain"
+                  className="max-h-64 object-contain relative z-10 animate-float drop-shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-transform duration-500 hover:scale-105"
                 />
               ) : (
-                <div className="w-48 h-48 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <Sparkles className="w-16 h-16 text-primary" />
+                <div className="w-48 h-48 rounded-xl bg-primary/20 flex items-center justify-center animate-pulse-glow relative z-10">
+                  <Sparkles className="w-16 h-16 text-primary animate-bounce-soft" />
                 </div>
               )}
             </div>
@@ -98,8 +105,8 @@ export const FeaturedBanner = () => {
             {/* Right - Content */}
             <div className="space-y-6">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 border border-primary/30">
-                <Sparkles className="w-4 h-4 text-primary" />
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 border border-primary/30 animate-glow-pulse">
+                <Sparkles className="w-4 h-4 text-primary animate-wiggle" />
                 <span className="text-sm font-medium text-primary">{settings.featured_banner_title}</span>
               </div>
 

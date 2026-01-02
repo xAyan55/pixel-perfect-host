@@ -35,9 +35,22 @@ export const HeroSection = () => {
 
   return (
     <section className="relative min-h-screen pt-24 pb-16 overflow-hidden">
-      {/* Background gradient effects */}
+      {/* Animated Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 -right-1/4 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl" />
+        {/* Floating orbs */}
+        <div className="absolute top-1/4 -right-1/4 w-[800px] h-[800px] bg-primary/10 rounded-full blur-3xl animate-pulse-glow" />
+        <div className="absolute top-1/2 -left-1/4 w-[600px] h-[600px] bg-violet-500/5 rounded-full blur-3xl animate-float-slow" />
+        <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-primary/5 rounded-full blur-2xl animate-float-reverse" />
+        
+        {/* Animated grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
+        
+        {/* Floating particles */}
+        <div className="absolute top-20 left-1/4 w-2 h-2 bg-primary/40 rounded-full animate-float" />
+        <div className="absolute top-40 right-1/4 w-3 h-3 bg-primary/30 rounded-full animate-float-slow" />
+        <div className="absolute bottom-40 left-1/3 w-2 h-2 bg-violet-400/40 rounded-full animate-float-reverse" />
+        <div className="absolute top-1/3 right-1/5 w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce-soft" />
+        
         <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-background to-transparent" />
       </div>
 
@@ -91,13 +104,20 @@ export const HeroSection = () => {
 
           {/* Right Content - Minecraft Character */}
           <div className="relative flex justify-center lg:justify-end opacity-0 animate-slide-in-right animation-delay-400">
-            <div className="relative">
-              {/* Glow effect behind image */}
-              <div className="absolute inset-0 bg-primary/20 blur-[100px] scale-75" />
+            <div className="relative group">
+              {/* Animated glow rings */}
+              <div className="absolute inset-0 bg-primary/30 blur-[100px] scale-75 animate-pulse-glow" />
+              <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-violet-500/20 to-primary/20 rounded-full blur-2xl animate-spin-slow opacity-50" />
+              
+              {/* Floating sparkles around character */}
+              <div className="absolute -top-4 left-1/4 w-2 h-2 bg-primary rounded-full animate-bounce-soft opacity-60" />
+              <div className="absolute top-1/4 -right-4 w-1.5 h-1.5 bg-violet-400 rounded-full animate-float opacity-70" />
+              <div className="absolute bottom-1/4 -left-6 w-2 h-2 bg-primary/80 rounded-full animate-float-reverse opacity-50" />
+              
               <img
                 src={heroCharacter}
                 alt="Minecraft Character"
-                className="relative z-10 w-full max-w-lg animate-float"
+                className="relative z-10 w-full max-w-lg animate-float-slow drop-shadow-[0_0_30px_rgba(59,130,246,0.3)] transition-transform duration-500 group-hover:scale-105"
               />
             </div>
           </div>
@@ -129,13 +149,16 @@ export const HeroSection = () => {
           ].map((feature, index) => (
             <div
               key={index}
-              className="feature-card group"
+              className="feature-card group relative overflow-hidden"
               style={{ animationDelay: `${600 + index * 100}ms` }}
             >
-              <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
+              {/* Shimmer effect on hover */}
+              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+              
+              <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors duration-300">
                 {feature.title}
               </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-muted-foreground/80 transition-colors duration-300">
                 {feature.description}
               </p>
             </div>
