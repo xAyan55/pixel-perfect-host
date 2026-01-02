@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { 
   Settings, Puzzle, Book, Package, Save, Layers, 
   RefreshCw, Wrench, Shield, Cpu, Wifi, MapPin, 
@@ -46,7 +45,6 @@ const getIconComponent = (iconName: string) => {
 };
 
 export const FeaturesSection = () => {
-  const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 });
   const [features, setFeatures] = useState<Feature[]>([]);
   const [settings, setSettings] = useState<FeaturesSectionSettings>({
     features_section_logo_url: "",
@@ -86,7 +84,8 @@ export const FeaturesSection = () => {
     fetchData();
   }, []);
 
-  if (loading || features.length === 0) return null;
+  if (loading) return null;
+  if (features.length === 0) return null;
 
   // Split features into positions around the center logo
   const topLeft = features[0];
@@ -98,13 +97,14 @@ export const FeaturesSection = () => {
   const bottomCenter = features[6];
   const bottomRight = features[7];
 
-  const FeatureCard = ({ feature, position }: { feature?: Feature; position: string }) => {
+  const FeatureCard = ({ feature, delay }: { feature?: Feature; delay: number }) => {
     if (!feature) return <div className="hidden lg:block" />;
     const IconComponent = getIconComponent(feature.icon);
     
     return (
       <div 
-        className={`feature-card group scroll-animate ${isVisible ? "visible" : ""} ${position}`}
+        className="feature-card group animate-fade-in"
+        style={{ animationDelay: `${delay}ms` }}
       >
         <div className="w-10 h-10 rounded-lg bg-card border border-border/50 flex items-center justify-center mb-3">
           <IconComponent className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -120,7 +120,7 @@ export const FeaturesSection = () => {
   };
 
   return (
-    <section id="features" className="py-20 relative overflow-hidden" ref={ref}>
+    <section id="features" className="py-20 relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
@@ -128,7 +128,7 @@ export const FeaturesSection = () => {
 
       <div className="container mx-auto px-6 relative">
         {/* Section subtitle */}
-        <p className={`text-center text-muted-foreground mb-16 scroll-animate ${isVisible ? "visible" : ""}`}>
+        <p className="text-center text-muted-foreground mb-16 animate-fade-in">
           {settings.features_section_subtitle}
         </p>
 
@@ -137,15 +137,15 @@ export const FeaturesSection = () => {
           {/* Grid layout */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Top Row */}
-            <FeatureCard feature={topLeft} position="stagger-1" />
-            <FeatureCard feature={topCenter} position="stagger-2" />
-            <FeatureCard feature={topRight} position="stagger-3" />
+            <FeatureCard feature={topLeft} delay={100} />
+            <FeatureCard feature={topCenter} delay={200} />
+            <FeatureCard feature={topRight} delay={300} />
             
             {/* Middle Row */}
-            <FeatureCard feature={middleLeft} position="stagger-4" />
+            <FeatureCard feature={middleLeft} delay={400} />
             
             {/* Center Logo */}
-            <div className={`relative flex items-center justify-center py-8 scroll-animate ${isVisible ? "visible" : ""} stagger-5`}>
+            <div className="relative flex items-center justify-center py-8 animate-fade-in" style={{ animationDelay: '500ms' }}>
               {/* Connection lines - desktop only */}
               <div className="hidden lg:block absolute inset-0">
                 {/* Vertical lines */}
@@ -172,12 +172,12 @@ export const FeaturesSection = () => {
               </div>
             </div>
             
-            <FeatureCard feature={middleRight} position="stagger-6" />
+            <FeatureCard feature={middleRight} delay={600} />
             
             {/* Bottom Row */}
-            <FeatureCard feature={bottomLeft} position="stagger-7" />
-            <FeatureCard feature={bottomCenter} position="stagger-8" />
-            <FeatureCard feature={bottomRight} position="stagger-9" />
+            <FeatureCard feature={bottomLeft} delay={700} />
+            <FeatureCard feature={bottomCenter} delay={800} />
+            <FeatureCard feature={bottomRight} delay={900} />
           </div>
         </div>
       </div>
