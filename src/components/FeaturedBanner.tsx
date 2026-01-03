@@ -65,9 +65,7 @@ export const FeaturedBanner = () => {
   if (loading || !popularPlan) return null;
 
   return (
-    <section className="py-8 relative">
-      <div className="container mx-auto px-6">
-        <div className="flex flex-col gap-3 max-w-md ml-auto">
+    <div className="flex flex-col gap-3">
           {/* Top Card - Update Available */}
           <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-slate-900/90 backdrop-blur-sm p-5 relative overflow-hidden">
             {/* Background glow */}
@@ -173,8 +171,6 @@ export const FeaturedBanner = () => {
               <span className="text-cyan-400 font-semibold">+20</span>
             </div>
           </Link>
-        </div>
-      </div>
-    </section>
+    </div>
   );
 };
