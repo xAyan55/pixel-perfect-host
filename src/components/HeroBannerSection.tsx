@@ -4,13 +4,13 @@ import { RamCalculator } from "./RamCalculator";
 export const HeroBannerSection = () => {
   return (
     <section className="py-16 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
+      {/* Subtle Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/3 to-transparent" />
       
       <div className="container mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-white italic mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground italic mb-3">
             Not sure which one to pick?
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
