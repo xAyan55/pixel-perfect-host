@@ -215,55 +215,55 @@ export const RamCalculator = () => {
         </div>
       </div>
 
-      {/* Recommendation Card */}
+      {/* Recommendation Card - Compact */}
       {recommendedPlan && (
-        <div className="mt-3 rounded-2xl border border-green-500/30 bg-slate-900/95 backdrop-blur-sm p-5 text-center">
+        <div className="mt-3 rounded-2xl border border-green-500/40 bg-slate-900/95 backdrop-blur-sm overflow-hidden text-center">
           {/* Badge */}
-          <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-semibold mb-4">
+          <div className="w-full py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold tracking-wider">
             WE RECOMMEND
           </div>
 
-          {/* Plan Icon */}
-          {recommendedPlan.image_url ? (
-            <img
-              src={recommendedPlan.image_url}
-              alt={recommendedPlan.name}
-              className="w-16 h-16 mx-auto mb-3 object-contain"
-            />
-          ) : (
-            <div className="w-16 h-16 mx-auto mb-3 rounded-xl bg-green-500/20 flex items-center justify-center">
-              <Box className="w-8 h-8 text-green-400" />
-            </div>
-          )}
+          <div className="p-4">
+            {/* Plan Icon */}
+            {recommendedPlan.image_url ? (
+              <img
+                src={recommendedPlan.image_url}
+                alt={recommendedPlan.name}
+                className="w-12 h-12 mx-auto mb-2 object-contain"
+              />
+            ) : (
+              <div className="w-12 h-12 mx-auto mb-2 rounded-lg bg-green-500/20 flex items-center justify-center">
+                <Box className="w-6 h-6 text-green-400" />
+              </div>
+            )}
 
-          {/* Plan Name */}
-          <h4 className="text-lg font-bold text-cyan-400 mb-1">
-            {recommendedPlan.name}
-          </h4>
-          <p className="text-xl font-bold text-white mb-3">
-            {recommendedPlan.ram} <span className="text-muted-foreground font-normal text-sm">RAM</span>
-          </p>
+            {/* Plan Name & RAM */}
+            <h4 className="text-base font-bold text-green-400">{recommendedPlan.name}</h4>
+            <p className="text-lg font-bold text-white">
+              {recommendedPlan.ram} <span className="text-muted-foreground font-normal text-xs">RAM</span>
+            </p>
 
-          {/* Description */}
-          <p className="text-sm text-muted-foreground mb-4 max-w-xs mx-auto">
-            {getDescription()}
-          </p>
+            {/* Description */}
+            <p className="text-xs text-muted-foreground mt-2 mb-3 leading-relaxed">
+              {getDescription()}
+            </p>
 
-          {/* Price */}
-          <p className="text-sm text-muted-foreground mb-2">Starting at</p>
-          <p className="text-2xl font-bold text-cyan-400 mb-4">
-            ${recommendedPlan.price}<span className="text-sm font-normal text-muted-foreground">/mo</span>
-          </p>
+            {/* Price */}
+            <p className="text-xs text-muted-foreground">Starting at</p>
+            <p className="text-xl font-bold text-green-400 mb-3">
+              ${recommendedPlan.price}<span className="text-xs font-normal text-muted-foreground">/mo</span>
+            </p>
 
-          {/* Order Button */}
-          <a
-            href={recommendedPlan.redirect_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center px-8 py-3 rounded-xl border-2 border-green-500 text-green-400 font-semibold hover:bg-green-500/10 transition-all duration-300"
-          >
-            Order Now
-          </a>
+            {/* Order Button */}
+            <a
+              href={recommendedPlan.redirect_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-6 py-2 rounded-lg border border-green-500 text-green-400 text-sm font-semibold hover:bg-green-500/10 transition-all duration-200"
+            >
+              Order Now
+            </a>
+          </div>
         </div>
       )}
     </div>
