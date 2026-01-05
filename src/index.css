@@ -155,7 +155,7 @@
 
   /* Scroll-triggered animations */
   .scroll-animate {
-    @apply opacity-0 translate-y-8 transition-all duration-700 ease-out;
+    @apply opacity-0 translate-y-4 transition-all duration-500 ease-out;
   }
 
   .scroll-animate.visible {
@@ -163,7 +163,7 @@
   }
 
   .scroll-animate-left {
-    @apply opacity-0 -translate-x-12 transition-all duration-700 ease-out;
+    @apply opacity-0 -translate-x-6 transition-all duration-500 ease-out;
   }
 
   .scroll-animate-left.visible {
@@ -171,7 +171,7 @@
   }
 
   .scroll-animate-right {
-    @apply opacity-0 translate-x-12 transition-all duration-700 ease-out;
+    @apply opacity-0 translate-x-6 transition-all duration-500 ease-out;
   }
 
   .scroll-animate-right.visible {
@@ -179,7 +179,7 @@
   }
 
   .scroll-animate-scale {
-    @apply opacity-0 scale-95 transition-all duration-700 ease-out;
+    @apply opacity-0 scale-[0.98] transition-all duration-500 ease-out;
   }
 
   .scroll-animate-scale.visible {

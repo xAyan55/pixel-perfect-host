@@ -35,15 +35,13 @@ export const HeroSection = () => {
 
   return (
     <section className="relative min-h-screen pt-24 pb-16 overflow-hidden">
-      {/* Subtle Background Effects */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Ambient glow orbs - subtle and slow */}
-        <div className="absolute top-1/4 -right-1/4 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[120px] animate-pulse-glow" />
-        <div className="absolute top-1/2 -left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] animate-glow-pulse" />
+      {/* Background Effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Ambient glow orbs */}
+        <div className="absolute top-1/4 -right-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]" />
+        <div className="absolute top-1/2 -left-1/4 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[80px]" />
         
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.02)_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_60%)]" />
-        
+        {/* Gradient overlay */}
         <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-background to-transparent" />
       </div>
 
@@ -99,12 +97,12 @@ export const HeroSection = () => {
           <div className="relative flex justify-center lg:justify-end opacity-0 animate-slide-in-right animation-delay-400">
             <div className="relative group">
               {/* Subtle glow behind character */}
-              <div className="absolute inset-0 bg-primary/20 blur-[80px] scale-75 animate-pulse-glow" />
+              <div className="absolute inset-0 bg-primary/10 blur-[60px] scale-75" />
               
               <img
                 src={heroCharacter}
                 alt="Minecraft Character"
-                className="relative z-10 w-full max-w-lg animate-float-slow drop-shadow-[0_0_40px_rgba(59,130,246,0.2)] transition-transform duration-500 group-hover:scale-[1.02]"
+                className="relative z-10 w-full max-w-lg drop-shadow-[0_0_30px_rgba(59,130,246,0.15)] transition-transform duration-300 group-hover:scale-[1.01]"
               />
             </div>
           </div>

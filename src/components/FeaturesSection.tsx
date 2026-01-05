@@ -123,7 +123,7 @@ export const FeaturesSection = () => {
     <section id="features" className="py-20 relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
+        <div className="w-[400px] h-[400px] bg-primary/3 rounded-full blur-[80px]" />
       </div>
 
       <div className="container mx-auto px-6 relative">
