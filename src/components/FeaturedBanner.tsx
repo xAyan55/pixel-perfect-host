@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { HardDrive, Cpu, Database } from "lucide-react";
+import { HardDrive, Cpu, Database, ArrowRight, Server } from "lucide-react";
 
 interface Plan {
   id: string;
@@ -24,8 +24,8 @@ interface BannerSettings {
 export const FeaturedBanner = () => {
   const [popularPlan, setPopularPlan] = useState<Plan | null>(null);
   const [settings, setSettings] = useState<BannerSettings>({
-    featured_banner_title: "UPDATE AVAILABLE",
-    featured_banner_subtitle: "Featured Server",
+    featured_banner_title: "FEATURED SERVER",
+    featured_banner_subtitle: "Perfect for your gaming community with reliable performance.",
     featured_banner_image_url: "",
   });
   const [loading, setLoading] = useState(true);
@@ -64,93 +64,83 @@ export const FeaturedBanner = () => {
 
   if (loading || !popularPlan) return null;
 
+  const bannerImage = settings.featured_banner_image_url || popularPlan.image_url;
+
   return (
-    <div className="flex flex-col gap-3">
-      {/* Plan Card - WiseHosting Style */}
-      <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/95 backdrop-blur-sm overflow-hidden">
-        {/* Popular Badge */}
-        <div className="w-full py-1.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold tracking-wider text-center">
-          FEATURED SERVER
+    <div className="rounded-xl border border-primary/20 bg-gradient-to-r from-card/80 via-card/60 to-primary/5 backdrop-blur-sm overflow-hidden">
+      <div className="flex flex-col md:flex-row items-center gap-6 p-5">
+        {/* Left - Image */}
+        <div className="flex-shrink-0">
+          {bannerImage ? (
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
+              <img 
+                src={bannerImage} 
+                alt={popularPlan.name} 
+                className="relative w-24 h-24 md:w-28 md:h-28 object-contain"
+              />
+            </div>
+          ) : (
+            <div className="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Server className="w-12 h-12 text-primary" />
+            </div>
+          )}
         </div>
 
-        <div className="p-5">
-          {/* Plan Header */}
-          <div className="flex items-start gap-3 mb-4">
-            {popularPlan.image_url ? (
-              <img 
-                src={popularPlan.image_url} 
-                alt={popularPlan.name} 
-                className="w-12 h-12 object-contain"
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center">
-                <HardDrive className="w-6 h-6 text-green-400" />
-              </div>
-            )}
-            <div>
-              <h4 className="font-bold text-green-400">{popularPlan.name}</h4>
-              <p className="text-lg font-bold text-white">
-                {popularPlan.ram} <span className="text-muted-foreground font-normal text-xs">RAM</span>
-              </p>
-            </div>
+        {/* Center - Content */}
+        <div className="flex-1 text-center md:text-left">
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold tracking-wider mb-2">
+            {settings.featured_banner_title || "FEATURED SERVER"}
           </div>
-
-          {/* Description */}
-          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+          <h3 className="text-lg md:text-xl font-bold text-foreground mb-1">
+            {popularPlan.name}
+          </h3>
+          <p className="text-sm text-muted-foreground mb-3 max-w-md">
             {settings.featured_banner_subtitle || "Perfect for your gaming community with reliable performance."}
           </p>
-
-          {/* Specs Box */}
-          <div className="rounded-xl bg-slate-800/60 border border-border/30 p-3 mb-4 space-y-2">
-            <div className="flex items-center gap-2 text-sm">
-              <Database className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-              <span className="text-foreground">{popularPlan.storage} Storage</span>
+          
+          {/* Specs Row */}
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <Database className="w-3.5 h-3.5 text-primary" />
+              <span>{popularPlan.ram}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Cpu className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-              <span className="text-foreground">{popularPlan.cpu}</span>
+            <div className="flex items-center gap-1.5">
+              <Cpu className="w-3.5 h-3.5 text-primary" />
+              <span>{popularPlan.cpu}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <HardDrive className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-              <span className="text-foreground">{popularPlan.bandwidth}</span>
+            <div className="flex items-center gap-1.5">
+              <HardDrive className="w-3.5 h-3.5 text-primary" />
+              <span>{popularPlan.storage}</span>
             </div>
           </div>
+        </div>
 
-          {/* Price & Button Row */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground">Starting at</p>
-              <p className="text-2xl font-bold text-white">
-                ${popularPlan.price}<span className="text-sm font-normal text-muted-foreground">/mo</span>
-              </p>
-            </div>
-            <a
-              href={popularPlan.redirect_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-5 py-2 rounded-lg border border-green-500 text-green-400 font-semibold text-sm hover:bg-green-500/10 transition-all duration-200"
-            >
-              Buy Now
-            </a>
+        {/* Right - Price & CTA */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="text-center">
+            <p className="text-[10px] text-muted-foreground">Starting at</p>
+            <p className="text-2xl font-bold text-foreground">
+              ${popularPlan.price}<span className="text-xs font-normal text-muted-foreground">/mo</span>
+            </p>
           </div>
+          <a
+            href={popularPlan.redirect_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all duration-200"
+          >
+            Order Now
+            <ArrowRight className="w-4 h-4" />
+          </a>
+          <Link 
+            to="/game-servers" 
+            className="text-xs text-muted-foreground hover:text-primary transition-colors"
+          >
+            View all packages →
+          </Link>
         </div>
       </div>
-
-      {/* More Packages Link */}
-      <Link 
-        to="/game-servers" 
-        className="rounded-2xl border border-border/50 bg-slate-900/80 backdrop-blur-sm px-5 py-3 flex items-center justify-between hover:border-cyan-500/30 transition-colors group"
-      >
-        <span className="font-semibold text-white text-sm">More Server Packages</span>
-        <div className="flex items-center gap-2">
-          <div className="flex -space-x-2">
-            <div className="w-5 h-5 rounded bg-yellow-500/80" />
-            <div className="w-5 h-5 rounded bg-stone-600/80" />
-            <div className="w-5 h-5 rounded bg-green-600/80" />
-          </div>
-          <span className="text-cyan-400 font-semibold text-sm">+20</span>
-        </div>
-      </Link>
     </div>
   );
 };
