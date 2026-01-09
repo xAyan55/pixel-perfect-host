@@ -3,6 +3,7 @@ import { Gamepad2, Globe, Cloud, Bot, Check, ArrowRight, ExternalLink } from "lu
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { supabase } from "@/integrations/supabase/client";
 import gamePanel from "@/assets/game-panel.webp";
+import { FloatingParticles } from "./FloatingParticles";
 
 const tabs = [
   { id: "game", label: "Game Hosting", icon: Gamepad2 },
@@ -101,11 +102,20 @@ export const SolutionsSection = () => {
   }, []);
 
   return (
-    <section id="solutions" className="py-24 relative">
-      {/* Gradient bar */}
+    <section id="solutions" className="py-24 relative overflow-hidden">
+      {/* Floating particles */}
+      <FloatingParticles count={12} />
+      
+      {/* Gradient bar with shimmer */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 max-w-[80%]">
-        <div className="gradient-bar animate-glow-pulse" />
+        <div className="gradient-bar animate-glow-pulse relative overflow-hidden">
+          <div className="absolute inset-0 animate-shimmer" />
+        </div>
       </div>
+      
+      {/* Background glows */}
+      <div className="absolute top-1/2 -right-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] animate-pulse-glow" />
+      <div className="absolute bottom-0 -left-1/4 w-[300px] h-[300px] bg-cyan-500/5 rounded-full blur-[80px] animate-pulse-glow" style={{ animationDelay: '3s' }} />
 
       <div className="container mx-auto px-6">
         {/* Section Header */}
@@ -179,12 +189,20 @@ export const SolutionsSection = () => {
 
           {/* Right - Image */}
           <div className={`relative scroll-animate-right ${contentVisible ? "visible" : ""}`}>
-            <div className="absolute inset-0 bg-primary/10 blur-[60px] scale-90" />
-            <div className="glass-card overflow-hidden">
+            {/* Animated decorative elements */}
+            <div className="absolute -top-6 -right-6 w-20 h-20 border border-primary/30 rounded-xl animate-bounce-subtle" />
+            <div className="absolute -bottom-4 -left-4 w-16 h-16 border border-cyan-400/20 rounded-lg animate-bounce-subtle" style={{ animationDelay: '1.5s' }} />
+            
+            <div className="absolute inset-0 bg-primary/15 blur-[80px] scale-90 animate-pulse-glow" />
+            <div className="glass-card overflow-hidden group relative">
+              {/* Image shimmer effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <div className="absolute inset-0 animate-shimmer" />
+              </div>
               <img
                 src={panelPreviewUrl || gamePanel}
                 alt={content.title}
-                className="w-full h-auto rounded-lg"
+                className="w-full h-auto rounded-lg transition-transform duration-500 group-hover:scale-[1.02]"
               />
             </div>
           </div>

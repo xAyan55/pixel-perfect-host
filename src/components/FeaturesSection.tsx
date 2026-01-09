@@ -5,6 +5,7 @@ import {
   RefreshCw, Wrench, Shield, Cpu, Wifi, MapPin, 
   Headphones, Eye, Database, Cloud, Zap, Lock
 } from "lucide-react";
+import { FloatingParticles } from "./FloatingParticles";
 
 interface Feature {
   id: string;
@@ -103,16 +104,22 @@ export const FeaturesSection = () => {
     
     return (
       <div 
-        className="feature-card group animate-fade-in"
+        className="feature-card group animate-fade-in relative overflow-hidden"
         style={{ animationDelay: `${delay}ms` }}
       >
-        <div className="w-10 h-10 rounded-lg bg-card border border-border/50 flex items-center justify-center mb-3">
-          <IconComponent className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+        {/* Shimmer effect on hover */}
+        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+        
+        {/* Icon glow on hover */}
+        <div className="absolute top-4 left-4 w-10 h-10 bg-primary/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        <div className="relative w-10 h-10 rounded-lg bg-card border border-border/50 flex items-center justify-center mb-3 group-hover:border-primary/50 group-hover:bg-primary/10 transition-all duration-300">
+          <IconComponent className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:scale-110 transition-all duration-300" />
         </div>
-        <h3 className="text-base font-semibold mb-2 group-hover:text-primary transition-colors">
+        <h3 className="text-base font-semibold mb-2 group-hover:text-primary transition-colors duration-300">
           {feature.title}
         </h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-muted-foreground/80 transition-colors duration-300">
           {feature.description}
         </p>
       </div>
@@ -121,9 +128,14 @@ export const FeaturesSection = () => {
 
   return (
     <section id="features" className="py-20 relative overflow-hidden">
+      {/* Floating particles */}
+      <FloatingParticles count={15} />
+      
       {/* Background glow */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[400px] h-[400px] bg-primary/3 rounded-full blur-[80px]" />
+        <div className="w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] animate-pulse-glow" />
+        <div className="absolute top-1/4 left-1/4 w-[200px] h-[200px] bg-cyan-500/5 rounded-full blur-[60px] animate-pulse-glow" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-[250px] h-[250px] bg-primary/5 rounded-full blur-[80px] animate-pulse-glow" style={{ animationDelay: '4s' }} />
       </div>
 
       <div className="container mx-auto px-6 relative">
