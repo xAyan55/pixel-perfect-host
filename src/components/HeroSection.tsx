@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import heroCharacter from "@/assets/hero-character.png";
+import { FloatingParticles } from "./FloatingParticles";
+import { AnimatedGrid } from "./AnimatedGrid";
 
 interface SiteSettings {
   free_server_url: string;
@@ -37,9 +39,20 @@ export const HeroSection = () => {
     <section className="relative min-h-screen pt-24 pb-16 overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Animated Grid */}
+        <AnimatedGrid />
+        
+        {/* Floating Particles */}
+        <FloatingParticles count={25} />
+        
         {/* Ambient glow orbs */}
-        <div className="absolute top-1/4 -right-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]" />
-        <div className="absolute top-1/2 -left-1/4 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[80px]" />
+        <div className="absolute top-1/4 -right-1/4 w-[500px] h-[500px] bg-primary/8 rounded-full blur-[120px] animate-pulse-glow" />
+        <div className="absolute top-1/2 -left-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] animate-pulse-glow" style={{ animationDelay: '3s' }} />
+        <div className="absolute bottom-1/4 right-1/3 w-[300px] h-[300px] bg-cyan-500/5 rounded-full blur-[80px] animate-pulse-glow" style={{ animationDelay: '6s' }} />
+        
+        {/* Rotating decorative ring */}
+        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] border border-primary/10 rounded-full animate-rotate-slow opacity-20" />
+        <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] border border-primary/5 rounded-full animate-rotate-slow opacity-20" style={{ animationDirection: 'reverse', animationDuration: '40s' }} />
         
         {/* Gradient overlay */}
         <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-background to-transparent" />
@@ -96,13 +109,25 @@ export const HeroSection = () => {
           {/* Right Content - Minecraft Character */}
           <div className="relative flex justify-center lg:justify-end opacity-0 animate-slide-in-right animation-delay-400">
             <div className="relative group">
+              {/* Animated rings behind character */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute w-[120%] h-[120%] border border-primary/20 rounded-full animate-pulse-glow" />
+                <div className="absolute w-[140%] h-[140%] border border-primary/10 rounded-full animate-pulse-glow" style={{ animationDelay: '1s' }} />
+                <div className="absolute w-[160%] h-[160%] border border-primary/5 rounded-full animate-pulse-glow" style={{ animationDelay: '2s' }} />
+              </div>
+              
               {/* Subtle glow behind character */}
-              <div className="absolute inset-0 bg-primary/10 blur-[60px] scale-75" />
+              <div className="absolute inset-0 bg-primary/15 blur-[80px] scale-75 animate-pulse-glow" />
+              
+              {/* Floating sparkles around character */}
+              <div className="absolute -top-4 right-1/4 w-2 h-2 bg-primary rounded-full animate-bounce-subtle" />
+              <div className="absolute top-1/4 -right-4 w-3 h-3 bg-cyan-400 rounded-full animate-bounce-subtle" style={{ animationDelay: '0.5s' }} />
+              <div className="absolute bottom-1/3 -left-6 w-2 h-2 bg-primary rounded-full animate-bounce-subtle" style={{ animationDelay: '1s' }} />
               
               <img
                 src={heroCharacter}
                 alt="Minecraft Character"
-                className="relative z-10 w-full max-w-lg drop-shadow-[0_0_30px_rgba(59,130,246,0.15)] transition-transform duration-300 group-hover:scale-[1.01]"
+                className="relative z-10 w-full max-w-lg drop-shadow-[0_0_40px_rgba(59,130,246,0.2)] transition-all duration-500 group-hover:scale-[1.02] group-hover:drop-shadow-[0_0_60px_rgba(59,130,246,0.3)]"
               />
             </div>
           </div>
