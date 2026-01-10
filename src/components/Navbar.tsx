@@ -41,41 +41,38 @@ export const Navbar = () => {
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       isScrolled 
-        ? 'bg-background/80 backdrop-blur-2xl border-b border-white/[0.05] shadow-[0_4px_30px_rgba(0,0,0,0.3)]' 
+        ? 'bg-background/90 backdrop-blur-xl border-b border-border/50' 
         : 'bg-transparent'
     }`}>
       <div className="container mx-auto px-6">
-        <div className="flex items-center justify-between h-18 py-4">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/30 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 border border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-all duration-300">
-                <svg viewBox="0 0 24 24" className="w-5 h-5 text-primary" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                  <path d="M2 17l10 5 10-5" />
-                  <path d="M2 12l10 5 10-5" />
-                </svg>
-              </div>
+            <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-all duration-300">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-primary" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                <path d="M2 17l10 5 10-5" />
+                <path d="M2 12l10 5 10-5" />
+              </svg>
             </div>
             <span className="text-xl font-bold tracking-tight">
-              <span className="gradient-text">KINETIC</span>
+              <span className="text-primary">KINETIC</span>
               <span className="text-foreground">HOST</span>
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1 p-1.5 rounded-full bg-card/30 backdrop-blur-xl border border-white/[0.05]">
+          <div className="hidden md:flex items-center gap-1 p-1.5 rounded-full bg-card/50 backdrop-blur-xl border border-border/50">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.href}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   location.pathname === link.href 
-                    ? 'bg-primary/15 text-primary' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.03]'
+                    ? 'bg-primary/20 text-primary' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 }`}
               >
                 {link.name}
@@ -89,17 +86,17 @@ export const Navbar = () => {
               href={controlPanelUrl} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm overflow-hidden transition-all duration-300 bg-gradient-to-r from-primary to-accent text-white shadow-[0_0_20px_hsl(217_91%_60%/0.3)] hover:shadow-[0_0_30px_hsl(217_91%_60%/0.5)] hover:-translate-y-0.5"
+              className="btn-primary text-sm py-2.5"
             >
               <Terminal className="w-4 h-4" />
               <span>Control Panel</span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="w-4 h-4" />
             </a>
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden relative p-2.5 rounded-xl bg-card/30 border border-white/[0.05] text-foreground"
+            className="md:hidden p-2.5 rounded-xl bg-card/50 border border-border/50 text-foreground"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -108,7 +105,7 @@ export const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden py-4 border-t border-white/[0.05] animate-slide-up">
+          <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
             <div className="flex flex-col gap-2">
               {navLinks.map((link) => (
                 <Link
@@ -116,8 +113,8 @@ export const Navbar = () => {
                   to={link.href}
                   className={`px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
                     location.pathname === link.href 
-                      ? 'bg-primary/15 text-primary' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.03]'
+                      ? 'bg-primary/20 text-primary' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
