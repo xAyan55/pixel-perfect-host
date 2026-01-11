@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Terminal, ChevronRight } from "lucide-react";
+import { Terminal, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const navLinks = [
@@ -12,7 +12,6 @@ const navLinks = [
 ];
 
 export const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [controlPanelUrl, setControlPanelUrl] = useState("#");
   const location = useLocation();
@@ -41,38 +40,41 @@ export const Navbar = () => {
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
       isScrolled 
-        ? 'bg-background/90 backdrop-blur-xl border-b border-border/50' 
+        ? 'bg-background/80 backdrop-blur-2xl border-b border-white/[0.08] shadow-lg shadow-background/50' 
         : 'bg-transparent'
     }`}>
-      <div className="container mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-14 md:h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-all duration-300">
-              <svg viewBox="0 0 24 24" className="w-5 h-5 text-primary" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/30 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 border border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-all duration-300">
+                <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
+                </svg>
+              </div>
             </div>
-            <span className="text-xl font-bold tracking-tight">
+            <span className="text-lg sm:text-xl font-bold tracking-tight">
               <span className="text-primary">KINETIC</span>
               <span className="text-foreground">HOST</span>
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1 p-1.5 rounded-full bg-card/50 backdrop-blur-xl border border-border/50">
+          <div className="hidden lg:flex items-center gap-1 p-1.5 rounded-full bg-card/40 backdrop-blur-xl border border-white/[0.08]">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.href}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   location.pathname === link.href 
-                    ? 'bg-primary/20 text-primary' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                    ? 'bg-primary/15 text-primary shadow-sm shadow-primary/20' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.05]'
                 }`}
               >
                 {link.name}
@@ -80,8 +82,8 @@ export const Navbar = () => {
             ))}
           </div>
 
-          {/* CTA Button */}
-          <div className="hidden md:flex items-center gap-4">
+          {/* CTA Button - Hidden on mobile, shown in bottom nav */}
+          <div className="hidden lg:flex items-center gap-4">
             <a 
               href={controlPanelUrl} 
               target="_blank" 
@@ -94,46 +96,19 @@ export const Navbar = () => {
             </a>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2.5 rounded-xl bg-card/50 border border-border/50 text-foreground"
-            onClick={() => setIsOpen(!isOpen)}
+          {/* Mobile Control Panel Button - Simplified */}
+          <a 
+            href={controlPanelUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="lg:hidden flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium"
           >
-            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+            <Terminal className="w-4 h-4" />
+            <span className="hidden sm:inline">Panel</span>
+          </a>
         </div>
 
-        {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
-            <div className="flex flex-col gap-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.href}
-                  className={`px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
-                    location.pathname === link.href 
-                      ? 'bg-primary/20 text-primary' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  {link.name}
-                </Link>
-              ))}
-              <a 
-                href={controlPanelUrl} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="btn-primary w-full justify-center mt-2" 
-                onClick={() => setIsOpen(false)}
-              >
-                <Terminal className="w-4 h-4" />
-                Control Panel
-              </a>
-            </div>
-          </div>
-        )}
+        {/* Mobile Navigation - Hidden, using bottom nav instead */}
       </div>
     </nav>
   );
