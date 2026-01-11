@@ -6,6 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
+import { FAQSkeleton } from "./Skeleton";
 
 interface FAQ {
   id: string;
@@ -34,8 +35,26 @@ export const FAQSection = () => {
     fetchFaqs();
   }, []);
 
-  if (loading) return null;
-  if (faqs.length === 0) return null;
+  if (faqs.length === 0 && !loading) return null;
+
+  // Loading skeleton
+  const LoadingSkeleton = () => (
+    <section id="faq" className="py-24 relative">
+      <div className="container mx-auto px-6 max-w-4xl">
+        <div className="text-center mb-12">
+          <div className="h-10 w-80 bg-muted/50 rounded mx-auto mb-4 animate-pulse" />
+          <div className="h-5 w-48 bg-muted/50 rounded mx-auto animate-pulse" />
+        </div>
+        <div className="space-y-4">
+          {[...Array(4)].map((_, i) => (
+            <FAQSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+
+  if (loading) return <LoadingSkeleton />;
 
   return (
     <section id="faq" className="py-24 relative">

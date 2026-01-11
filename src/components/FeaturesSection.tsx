@@ -6,6 +6,7 @@ import {
   Headphones, Eye, Database, Cloud, Zap, Lock
 } from "lucide-react";
 import { FloatingParticles } from "./FloatingParticles";
+import { FeatureCardSkeleton } from "./Skeleton";
 
 interface Feature {
   id: string;
@@ -85,8 +86,25 @@ export const FeaturesSection = () => {
     fetchData();
   }, []);
 
-  if (loading) return null;
-  if (features.length === 0) return null;
+  if (features.length === 0 && !loading) return null;
+
+  // Loading skeleton
+  const LoadingSkeleton = () => (
+    <section id="features" className="py-20 relative overflow-hidden">
+      <div className="container mx-auto px-6 relative">
+        <div className="h-6 w-64 bg-muted/50 rounded mx-auto mb-16 animate-pulse" />
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {[...Array(9)].map((_, i) => (
+              <FeatureCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+
+  if (loading) return <LoadingSkeleton />;
 
   // Split features into positions around the center logo
   const topLeft = features[0];
