@@ -62,23 +62,15 @@
     font-family: 'Space Grotesk', 'Inter', sans-serif;
   }
 
-  /* Enhanced animation keyframes */
+  /* Minimalistic animation keyframes */
   @keyframes float {
     0%, 100% {
-      transform: translateY(0px) translateX(0px) rotate(0deg);
-      opacity: 0.4;
-    }
-    25% {
-      transform: translateY(-25px) translateX(12px) rotate(3deg);
-      opacity: 0.7;
+      transform: translateY(0px);
+      opacity: 0.3;
     }
     50% {
-      transform: translateY(-12px) translateX(-8px) rotate(-2deg);
+      transform: translateY(-15px);
       opacity: 0.5;
-    }
-    75% {
-      transform: translateY(-35px) translateX(6px) rotate(1deg);
-      opacity: 0.6;
     }
   }
 
@@ -191,14 +183,8 @@
     0%, 100% {
       transform: translate(-50%, -50%) translate(0, 0);
     }
-    25% {
-      transform: translate(-50%, -50%) translate(30px, -40px);
-    }
     50% {
-      transform: translate(-50%, -50%) translate(-20px, 20px);
-    }
-    75% {
-      transform: translate(-50%, -50%) translate(40px, 30px);
+      transform: translate(-50%, -50%) translate(15px, -20px);
     }
   }
 
@@ -255,11 +241,11 @@
   }
 
   .animate-float {
-    animation: float 18s ease-in-out infinite;
+    animation: float 25s ease-in-out infinite;
   }
 
   .animate-orb-float {
-    animation: orb-float 25s ease-in-out infinite;
+    animation: orb-float 40s ease-in-out infinite;
   }
 
   .animate-morph {
