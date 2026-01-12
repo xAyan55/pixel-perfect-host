@@ -15,20 +15,20 @@ export const DynamicBackground = () => {
 
   useEffect(() => {
     const colors = [
-      "hsl(217 91% 60% / 0.08)", // primary blue - reduced opacity
-      "hsl(190 90% 50% / 0.06)", // accent cyan - reduced opacity
-      "hsl(280 70% 50% / 0.04)", // purple - reduced opacity
+      "hsl(217 91% 60% / 0.05)", // primary blue - very subtle
+      "hsl(190 90% 50% / 0.04)", // accent cyan - very subtle
+      "hsl(280 70% 50% / 0.03)", // purple - very subtle
     ];
 
-    // Reduced to 3 orbs for subtler effect
-    const newOrbs = Array.from({ length: 3 }, (_, i) => ({
+    // Just 2 orbs for very subtle effect
+    const newOrbs = Array.from({ length: 2 }, (_, i) => ({
       id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: 400 + Math.random() * 300,
+      x: 20 + Math.random() * 60,
+      y: 20 + Math.random() * 60,
+      size: 500 + Math.random() * 200,
       color: colors[i % colors.length],
-      duration: 30 + Math.random() * 20, // Slower animation
-      delay: Math.random() * 5,
+      duration: 50 + Math.random() * 20, // Very slow animation
+      delay: Math.random() * 3,
     }));
     setOrbs(newOrbs);
   }, []);
