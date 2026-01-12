@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { PlanCard } from "@/components/PlanCard";
+import { HostingPlanCard } from "@/components/HostingPlanCard";
+import { ThunderLoader } from "@/components/ThunderLoader";
 import { Badge } from "@/components/ui/badge";
-import { Globe, Loader2, Shield, Zap, Lock, Mail } from "lucide-react";
+import { Globe, Shield, Zap, Lock, Mail } from "lucide-react";
 
 interface Plan {
   id: string;
@@ -43,10 +44,10 @@ export default function WebHosting() {
   }, []);
 
   const features = [
-    { icon: <Lock className="w-6 h-6" />, title: "Free SSL", desc: "Secure your site with HTTPS" },
-    { icon: <Zap className="w-6 h-6" />, title: "One-Click Install", desc: "WordPress, Joomla & more" },
-    { icon: <Mail className="w-6 h-6" />, title: "Email Hosting", desc: "Professional email accounts" },
-    { icon: <Shield className="w-6 h-6" />, title: "Daily Backups", desc: "Never lose your data" },
+    { icon: <Lock className="w-5 h-5" />, title: "Free SSL", desc: "Secure HTTPS" },
+    { icon: <Zap className="w-5 h-5" />, title: "One-Click Install", desc: "WordPress & more" },
+    { icon: <Mail className="w-5 h-5" />, title: "Email Hosting", desc: "Pro email accounts" },
+    { icon: <Shield className="w-5 h-5" />, title: "Daily Backups", desc: "Never lose data" },
   ];
 
   return (
@@ -55,39 +56,50 @@ export default function WebHosting() {
       
       <main className="pt-24 pb-16">
         {/* Hero Section */}
-        <section className="relative py-16 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-background to-background pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <section className="relative py-20 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
           
-          <div className="container mx-auto px-4 relative z-10 text-center">
-            <Badge variant="outline" className="mb-4 border-primary/50 text-primary">
-              <Globe className="w-3 h-3 mr-1" />
-              Web Hosting
-            </Badge>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Fast & Reliable{" "}
-              <span className="bg-gradient-to-r from-primary to-cyan-400 bg-clip-text text-transparent">
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center max-w-3xl mx-auto">
+              <Badge variant="outline" className="mb-6 border-primary/40 text-primary bg-primary/5 px-4 py-1.5">
+                <Globe className="w-3.5 h-3.5 mr-1.5" />
                 Web Hosting
-              </span>
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              Host your websites with blazing-fast speeds, free SSL certificates, 
-              and unlimited email accounts. Perfect for blogs, portfolios, and businesses.
-            </p>
+              </Badge>
+              
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                Fast & Reliable{" "}
+                <span className="gradient-text">
+                  Web Hosting
+                </span>
+              </h1>
+              
+              <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
+                Host your websites with blazing-fast speeds, free SSL certificates, 
+                and unlimited email accounts. Perfect for blogs, portfolios, and businesses.
+              </p>
+            </div>
           </div>
         </section>
 
         {/* Features */}
         <section className="py-12">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {features.map((feature, i) => (
-                <div key={i} className="text-center p-6 rounded-xl bg-card/50 border border-border/50">
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <div 
+                  key={i} 
+                  className="text-center p-5 rounded-xl bg-card/30 border border-border/30 transition-all duration-300 hover:border-primary/20 hover:bg-card/50"
+                  style={{
+                    opacity: 0,
+                    animation: `slide-up-fade 0.4s ease-out ${i * 60}ms forwards`
+                  }}
+                >
+                  <div className="w-10 h-10 mx-auto mb-3 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                     {feature.icon}
                   </div>
-                  <h3 className="font-semibold mb-1">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                  <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
+                  <p className="text-xs text-muted-foreground">{feature.desc}</p>
                 </div>
               ))}
             </div>
@@ -98,22 +110,20 @@ export default function WebHosting() {
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Choose Your Web Hosting Plan</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Choose Your Web Hosting Plan</h2>
               <p className="text-muted-foreground">
                 All plans include free SSL and 24/7 support
               </p>
             </div>
 
             {loading ? (
-              <div className="flex justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
+              <ThunderLoader />
             ) : plans.length === 0 ? (
               <p className="text-center text-muted-foreground">No plans available at the moment.</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {plans.map((plan, index) => (
-                  <PlanCard key={plan.id} plan={plan} index={index} />
+                  <HostingPlanCard key={plan.id} plan={plan} index={index} />
                 ))}
               </div>
             )}
