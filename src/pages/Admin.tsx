@@ -74,6 +74,7 @@ interface SiteSettings {
   featured_banner_image_url: string;
   features_section_logo_url: string;
   features_section_subtitle: string;
+  watch_demo_url: string;
 }
 
 const categoryIcons = {
@@ -163,6 +164,7 @@ export default function Admin() {
     featured_banner_image_url: "",
     features_section_logo_url: "",
     features_section_subtitle: "Advanced tools to manage, customize, and create your server",
+    watch_demo_url: "",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
@@ -926,6 +928,15 @@ export default function Admin() {
                       onChange={(e) => setSiteSettings({ ...siteSettings, free_server_url: e.target.value })}
                       placeholder="https://billing.example.com/free"
                     />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Watch Demo URL</label>
+                    <Input
+                      value={siteSettings.watch_demo_url}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, watch_demo_url: e.target.value })}
+                      placeholder="https://youtube.com/watch?v=..."
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">URL for the "Watch Demo" button on game servers page</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <Switch

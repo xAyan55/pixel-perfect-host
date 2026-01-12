@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { PlanCard } from "@/components/PlanCard";
+import { GamePlanCard } from "@/components/GamePlanCard";
+import { ThunderLoader } from "@/components/ThunderLoader";
 import { Badge } from "@/components/ui/badge";
-import { Gamepad2, Loader2, Shield, Zap, Server, Headphones } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Gamepad2, Shield, Zap, Server, Headphones, Play } from "lucide-react";
 
 interface Plan {
   id: string;
@@ -23,30 +25,44 @@ interface Plan {
 export default function GameHosting() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [watchDemoUrl, setWatchDemoUrl] = useState("");
 
   useEffect(() => {
-    const fetchPlans = async () => {
-      const { data, error } = await supabase
-        .from("hosting_plans")
-        .select("*")
-        .eq("category", "game")
-        .eq("enabled", true)
-        .order("sort_order", { ascending: true });
+    const fetchData = async () => {
+      // Fetch plans and settings in parallel
+      const [plansRes, settingsRes] = await Promise.all([
+        supabase
+          .from("hosting_plans")
+          .select("*")
+          .eq("category", "game")
+          .eq("enabled", true)
+          .order("sort_order", { ascending: true }),
+        supabase
+          .from("site_settings")
+          .select("*")
+          .eq("setting_key", "watch_demo_url")
+          .single()
+      ]);
 
-      if (!error && data) {
-        setPlans(data as Plan[]);
+      if (!plansRes.error && plansRes.data) {
+        setPlans(plansRes.data as Plan[]);
       }
+      
+      if (!settingsRes.error && settingsRes.data) {
+        setWatchDemoUrl(settingsRes.data.setting_value || "");
+      }
+      
       setLoading(false);
     };
 
-    fetchPlans();
+    fetchData();
   }, []);
 
   const features = [
-    { icon: <Shield className="w-6 h-6" />, title: "DDoS Protection", desc: "Enterprise-grade protection against attacks" },
-    { icon: <Zap className="w-6 h-6" />, title: "Instant Setup", desc: "Your server is ready in seconds" },
-    { icon: <Server className="w-6 h-6" />, title: "NVMe Storage", desc: "Lightning-fast game performance" },
-    { icon: <Headphones className="w-6 h-6" />, title: "24/7 Support", desc: "Expert help whenever you need it" },
+    { icon: <Shield className="w-5 h-5" />, title: "DDoS Protection", desc: "Enterprise-grade security" },
+    { icon: <Zap className="w-5 h-5" />, title: "Instant Setup", desc: "Ready in seconds" },
+    { icon: <Server className="w-5 h-5" />, title: "NVMe Storage", desc: "Ultra-fast performance" },
+    { icon: <Headphones className="w-5 h-5" />, title: "24/7 Support", desc: "Expert help anytime" },
   ];
 
   return (
@@ -55,40 +71,65 @@ export default function GameHosting() {
       
       <main className="pt-24 pb-16">
         {/* Hero Section */}
-        <section className="relative py-16 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-background to-background pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <section className="relative py-20 overflow-hidden">
+          {/* Background effects */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
           
-          <div className="container mx-auto px-4 relative z-10 text-center">
-            <Badge variant="outline" className="mb-4 border-primary/50 text-primary">
-              <Gamepad2 className="w-3 h-3 mr-1" />
-              Game Server Hosting
-            </Badge>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Premium{" "}
-              <span className="bg-gradient-to-r from-primary to-cyan-400 bg-clip-text text-transparent">
-                Game Server
-              </span>{" "}
-              Hosting
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              Minecraft, CS2, Rust, ARK, and more. Deploy your game server instantly with 
-              enterprise-grade DDoS protection and 24/7 expert support.
-            </p>
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center max-w-3xl mx-auto">
+              <Badge variant="outline" className="mb-6 border-primary/40 text-primary bg-primary/5 px-4 py-1.5">
+                <Gamepad2 className="w-3.5 h-3.5 mr-1.5" />
+                Game Server Hosting
+              </Badge>
+              
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                Premium{" "}
+                <span className="gradient-text">
+                  Game Server
+                </span>{" "}
+                Hosting
+              </h1>
+              
+              <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
+                Minecraft, CS2, Rust, ARK, and more. Deploy instantly with 
+                enterprise-grade DDoS protection and 24/7 expert support.
+              </p>
+
+              {watchDemoUrl && (
+                <Button 
+                  asChild 
+                  variant="outline" 
+                  className="gap-2 border-primary/30 hover:border-primary/50 hover:bg-primary/5"
+                >
+                  <a href={watchDemoUrl} target="_blank" rel="noopener noreferrer">
+                    <Play className="w-4 h-4" />
+                    Watch Demo
+                  </a>
+                </Button>
+              )}
+            </div>
           </div>
         </section>
 
         {/* Features */}
         <section className="py-12">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {features.map((feature, i) => (
-                <div key={i} className="text-center p-6 rounded-xl bg-card/50 border border-border/50">
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <div 
+                  key={i} 
+                  className="text-center p-5 rounded-xl bg-card/30 border border-border/30 transition-all duration-300 hover:border-primary/20 hover:bg-card/50"
+                  style={{
+                    opacity: 0,
+                    animation: `slide-up-fade 0.4s ease-out ${i * 60}ms forwards`
+                  }}
+                >
+                  <div className="w-10 h-10 mx-auto mb-3 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                     {feature.icon}
                   </div>
-                  <h3 className="font-semibold mb-1">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                  <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
+                  <p className="text-xs text-muted-foreground">{feature.desc}</p>
                 </div>
               ))}
             </div>
@@ -99,22 +140,20 @@ export default function GameHosting() {
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Choose Your Plan</h2>
               <p className="text-muted-foreground">
                 All plans include instant deployment and DDoS protection
               </p>
             </div>
 
             {loading ? (
-              <div className="flex justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
+              <ThunderLoader />
             ) : plans.length === 0 ? (
               <p className="text-center text-muted-foreground">No plans available at the moment.</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {plans.map((plan, index) => (
-                  <PlanCard key={plan.id} plan={plan} index={index} />
+                  <GamePlanCard key={plan.id} plan={plan} index={index} />
                 ))}
               </div>
             )}
