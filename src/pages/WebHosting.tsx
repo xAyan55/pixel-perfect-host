@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { HostingPlanCard } from "@/components/HostingPlanCard";
+import { HostingPageLayout } from "@/components/HostingPageLayout";
+import { ShockbytePlanCard } from "@/components/ShockbytePlanCard";
+import { BillingToggle, BillingCycle } from "@/components/BillingToggle";
 import { ThunderLoader } from "@/components/ThunderLoader";
-import { Badge } from "@/components/ui/badge";
-import { Globe, Shield, Zap, Lock, Mail } from "lucide-react";
+import { Globe, Shield, Zap, Lock, Mail, Database, Cpu } from "lucide-react";
 
 interface Plan {
   id: string;
@@ -19,11 +18,22 @@ interface Plan {
   features: string[];
   redirect_url: string;
   popular: boolean;
+  image_url?: string | null;
 }
+
+const trustBadges = [
+  { icon: <Lock className="w-4 h-4 text-primary" />, label: "Free SSL Certificate" },
+  { icon: <Zap className="w-4 h-4 text-primary" />, label: "One-Click WordPress" },
+  { icon: <Mail className="w-4 h-4 text-primary" />, label: "Unlimited Email Accounts" },
+  { icon: <Shield className="w-4 h-4 text-primary" />, label: "Daily Backups" },
+  { icon: <Database className="w-4 h-4 text-primary" />, label: "MySQL Databases" },
+  { icon: <Cpu className="w-4 h-4 text-primary" />, label: "99.9% Uptime" },
+];
 
 export default function WebHosting() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -43,95 +53,37 @@ export default function WebHosting() {
     fetchPlans();
   }, []);
 
-  const features = [
-    { icon: <Lock className="w-5 h-5" />, title: "Free SSL", desc: "Secure HTTPS" },
-    { icon: <Zap className="w-5 h-5" />, title: "One-Click Install", desc: "WordPress & more" },
-    { icon: <Mail className="w-5 h-5" />, title: "Email Hosting", desc: "Pro email accounts" },
-    { icon: <Shield className="w-5 h-5" />, title: "Daily Backups", desc: "Never lose data" },
-  ];
-
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      <main className="pt-24 pb-16">
-        {/* Hero Section */}
-        <section className="relative py-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-          
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="text-center max-w-3xl mx-auto">
-              <Badge variant="outline" className="mb-6 border-primary/40 text-primary bg-primary/5 px-4 py-1.5">
-                <Globe className="w-3.5 h-3.5 mr-1.5" />
-                Web Hosting
-              </Badge>
-              
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Fast & Reliable{" "}
-                <span className="gradient-text">
-                  Web Hosting
-                </span>
-              </h1>
-              
-              <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-                Host your websites with blazing-fast speeds, free SSL certificates, 
-                and unlimited email accounts. Perfect for blogs, portfolios, and businesses.
-              </p>
-            </div>
-          </div>
-        </section>
+    <HostingPageLayout
+      badge={{ icon: <Globe className="w-8 h-8 text-primary" />, label: "Web Hosting" }}
+      title="FAST & RELIABLE"
+      titleHighlight="WEB HOSTING"
+      description="Host your websites with blazing-fast speeds, free SSL certificates, and unlimited email accounts. Perfect for blogs, portfolios, e-commerce, and business websites."
+      descriptionHighlight="blazing-fast speeds, free SSL certificates,"
+      trustBadges={trustBadges}
+    >
+      {/* Billing Toggle */}
+      <div className="flex justify-end mb-8">
+        <BillingToggle value={billingCycle} onChange={setBillingCycle} />
+      </div>
 
-        {/* Features */}
-        <section className="py-12">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {features.map((feature, i) => (
-                <div 
-                  key={i} 
-                  className="text-center p-5 rounded-xl bg-card/30 border border-border/30 transition-all duration-300 hover:border-primary/20 hover:bg-card/50"
-                  style={{
-                    opacity: 0,
-                    animation: `slide-up-fade 0.4s ease-out ${i * 60}ms forwards`
-                  }}
-                >
-                  <div className="w-10 h-10 mx-auto mb-3 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                    {feature.icon}
-                  </div>
-                  <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
-                  <p className="text-xs text-muted-foreground">{feature.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Plans */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Choose Your Web Hosting Plan</h2>
-              <p className="text-muted-foreground">
-                All plans include free SSL and 24/7 support
-              </p>
-            </div>
-
-            {loading ? (
-              <ThunderLoader />
-            ) : plans.length === 0 ? (
-              <p className="text-center text-muted-foreground">No plans available at the moment.</p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {plans.map((plan, index) => (
-                  <HostingPlanCard key={plan.id} plan={plan} index={index} />
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      </main>
-
-      <Footer />
-    </div>
+      {/* Plans Grid */}
+      {loading ? (
+        <ThunderLoader />
+      ) : plans.length === 0 ? (
+        <p className="text-center text-muted-foreground">No plans available at the moment.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {plans.map((plan, index) => (
+            <ShockbytePlanCard 
+              key={plan.id} 
+              plan={plan} 
+              index={index} 
+              billingCycle={billingCycle}
+            />
+          ))}
+        </div>
+      )}
+    </HostingPageLayout>
   );
 }
