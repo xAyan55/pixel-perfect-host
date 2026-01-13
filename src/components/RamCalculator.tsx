@@ -94,112 +94,110 @@ export const RamCalculator = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row gap-4">
-      {/* Main Calculator Card */}
-      <div className="flex-1 rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-5">
-        <div className="flex items-center gap-2 mb-5">
-          <Server className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">RAM Calculator</h3>
-        </div>
+    <div className="flex-1 rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-5 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-5">
+        <Server className="w-5 h-5 text-primary" />
+        <h3 className="text-lg font-semibold text-foreground">RAM Calculator</h3>
+      </div>
 
-        {/* Server Type Selection */}
-        <div className="mb-5">
+      {/* Server Type Selection */}
+      <div className="mb-5">
+        <div className="flex items-center gap-1.5 mb-2">
+          <span className="text-xs font-medium text-foreground">Server Type</span>
+          <HelpCircle className="w-3 h-3 text-muted-foreground" />
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5">
+          {serverTypes.map((type) => (
+            <button
+              key={type.id}
+              onClick={() => setServerType(type.id)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-left transition-all ${
+                serverType === type.id
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/50"
+              }`}
+            >
+              {type.icon}
+              <div>
+                <div className="text-xs font-medium">{type.name}</div>
+                <div className="text-[10px] opacity-70">{type.subtitle}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Player Count Slider */}
+      <div className="mb-5">
+        <div className="flex items-center gap-1.5 mb-2">
+          <span className="text-xs font-medium text-foreground">Player Count</span>
+          <HelpCircle className="w-3 h-3 text-muted-foreground" />
+        </div>
+        <Slider
+          value={[playerCount]}
+          onValueChange={(value) => setPlayerCount(value[0])}
+          max={100}
+          step={1}
+          className="mb-1.5"
+        />
+        <div className="flex justify-between text-[10px] text-muted-foreground">
+          {playerMarks.map((mark) => (
+            <span key={mark.value}>{mark.label}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* Mods Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+        {/* Number of Mods */}
+        <div>
           <div className="flex items-center gap-1.5 mb-2">
-            <span className="text-xs font-medium text-foreground">Server Type</span>
+            <span className="text-xs font-medium text-foreground">Server mods</span>
             <HelpCircle className="w-3 h-3 text-muted-foreground" />
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5">
-            {serverTypes.map((type) => (
-              <button
-                key={type.id}
-                onClick={() => setServerType(type.id)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-left transition-all ${
-                  serverType === type.id
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/50"
-                }`}
-              >
-                {type.icon}
-                <div>
-                  <div className="text-xs font-medium">{type.name}</div>
-                  <div className="text-[10px] opacity-70">{type.subtitle}</div>
-                </div>
-              </button>
-            ))}
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border/50 bg-muted/30">
+            <span className="text-sm font-medium text-foreground flex-1">{modCount}</span>
+            <button
+              onClick={() => setModCount(Math.max(0, modCount - 10))}
+              className="p-1.5 rounded-md bg-background/50 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setModCount(modCount + 10)}
+              className="p-1.5 rounded-md bg-background/50 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 
-        {/* Player Count Slider */}
-        <div className="mb-5">
+        {/* Optimization Mods Toggle */}
+        <div>
           <div className="flex items-center gap-1.5 mb-2">
-            <span className="text-xs font-medium text-foreground">Player Count</span>
+            <span className="text-xs font-medium text-foreground">Optimization mods?</span>
             <HelpCircle className="w-3 h-3 text-muted-foreground" />
           </div>
-          <Slider
-            value={[playerCount]}
-            onValueChange={(value) => setPlayerCount(value[0])}
-            max={100}
-            step={1}
-            className="mb-1.5"
-          />
-          <div className="flex justify-between text-[10px] text-muted-foreground">
-            {playerMarks.map((mark) => (
-              <span key={mark.value}>{mark.label}</span>
-            ))}
-          </div>
-        </div>
-
-        {/* Mods Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* Number of Mods */}
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-xs font-medium text-foreground">Server mods</span>
-              <HelpCircle className="w-3 h-3 text-muted-foreground" />
-            </div>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border/50 bg-muted/30">
-              <span className="text-sm font-medium text-foreground flex-1">{modCount}</span>
-              <button
-                onClick={() => setModCount(Math.max(0, modCount - 10))}
-                className="p-1.5 rounded-md bg-background/50 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Minus className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => setModCount(modCount + 10)}
-                className="p-1.5 rounded-md bg-background/50 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Plus className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Optimization Mods Toggle */}
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-xs font-medium text-foreground">Optimization mods?</span>
-              <HelpCircle className="w-3 h-3 text-muted-foreground" />
-            </div>
-            <div className="flex items-center justify-between px-3 py-2 rounded-lg border border-border/50 bg-muted/30">
-              <span className="text-[10px] text-muted-foreground">Lithium, C2ME, etc.</span>
-              <Switch
-                checked={useOptimizationMods}
-                onCheckedChange={setUseOptimizationMods}
-              />
-            </div>
+          <div className="flex items-center justify-between px-3 py-2 rounded-lg border border-border/50 bg-muted/30">
+            <span className="text-[10px] text-muted-foreground">Lithium, C2ME, etc.</span>
+            <Switch
+              checked={useOptimizationMods}
+              onCheckedChange={setUseOptimizationMods}
+            />
           </div>
         </div>
       </div>
 
-      {/* Recommendation Card - Compact Side Panel */}
+      {/* Recommendation Card - Now Below Controls */}
       {recommendedPlan && (
-        <div className="lg:w-56 rounded-xl border border-primary/30 bg-card/50 backdrop-blur-sm overflow-hidden flex flex-col">
+        <div className="mt-auto rounded-xl border border-primary/30 bg-gradient-to-b from-primary/5 to-transparent overflow-hidden">
           {/* Header Badge */}
           <div className="py-1.5 bg-gradient-to-r from-primary to-cyan-500 text-primary-foreground text-[10px] font-bold tracking-wider text-center uppercase">
             We Recommend
           </div>
 
-          <div className="p-4 flex-1 flex flex-col items-center text-center">
+          <div className="p-4 flex flex-col items-center text-center">
             {/* Plan Icon */}
             {recommendedPlan.image_url ? (
               <img
@@ -225,7 +223,7 @@ export const RamCalculator = () => {
             </p>
 
             {/* Price */}
-            <div className="mt-auto">
+            <div>
               <p className="text-[10px] text-muted-foreground">Starting at</p>
               <p className="text-lg font-bold text-primary">
                 ${recommendedPlan.price}<span className="text-[10px] font-normal text-muted-foreground">/mo</span>
@@ -237,7 +235,7 @@ export const RamCalculator = () => {
               href={recommendedPlan.redirect_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all duration-200"
+              className="mt-3 w-full max-w-xs inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all duration-200"
             >
               Order Now
             </a>
