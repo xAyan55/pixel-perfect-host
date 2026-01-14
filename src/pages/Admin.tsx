@@ -75,6 +75,10 @@ interface SiteSettings {
   features_section_logo_url: string;
   features_section_subtitle: string;
   watch_demo_url: string;
+  game_hero_image_url: string;
+  vps_hero_image_url: string;
+  web_hero_image_url: string;
+  bot_hero_image_url: string;
 }
 
 const categoryIcons = {
@@ -165,6 +169,10 @@ export default function Admin() {
     features_section_logo_url: "",
     features_section_subtitle: "Advanced tools to manage, customize, and create your server",
     watch_demo_url: "",
+    game_hero_image_url: "",
+    vps_hero_image_url: "",
+    web_hero_image_url: "",
+    bot_hero_image_url: "",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
@@ -541,7 +549,7 @@ export default function Admin() {
 
   const handleImageUpload = async (
     file: File, 
-    type: "logo" | "panel_preview" | "featured_banner" | "features_section_logo" | "plan",
+    type: "logo" | "panel_preview" | "featured_banner" | "features_section_logo" | "plan" | "game_hero" | "vps_hero" | "web_hero" | "bot_hero",
     planId?: string
   ) => {
     setUploadingImage(type === "plan" ? planId! : type);
@@ -571,6 +579,14 @@ export default function Admin() {
       setSiteSettings((prev) => ({ ...prev, featured_banner_image_url: publicUrl }));
     } else if (type === "features_section_logo") {
       setSiteSettings((prev) => ({ ...prev, features_section_logo_url: publicUrl }));
+    } else if (type === "game_hero") {
+      setSiteSettings((prev) => ({ ...prev, game_hero_image_url: publicUrl }));
+    } else if (type === "vps_hero") {
+      setSiteSettings((prev) => ({ ...prev, vps_hero_image_url: publicUrl }));
+    } else if (type === "web_hero") {
+      setSiteSettings((prev) => ({ ...prev, web_hero_image_url: publicUrl }));
+    } else if (type === "bot_hero") {
+      setSiteSettings((prev) => ({ ...prev, bot_hero_image_url: publicUrl }));
     } else if (type === "plan" && editingPlan) {
       setEditingPlan({ ...editingPlan, image_url: publicUrl });
     }
@@ -1161,6 +1177,199 @@ export default function Admin() {
                         </Button>
                       </label>
                       <p className="text-xs text-muted-foreground">Logo displayed in the center of the features grid</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Hosting Page Hero Images */}
+              <Card className="bg-card/50 border-border/50 lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">Hosting Page Hero Images</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <p className="text-sm text-muted-foreground">
+                    Upload hero images for each hosting category page. These images appear in the hero section.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Game Hosting Hero */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Gamepad2 className="w-4 h-4 text-primary" />
+                        Game Hosting Hero
+                      </label>
+                      <div className="flex items-center gap-4">
+                        {siteSettings.game_hero_image_url ? (
+                          <img src={siteSettings.game_hero_image_url} alt="Game Hero" className="h-20 w-20 rounded object-contain bg-muted" />
+                        ) : (
+                          <div className="h-20 w-20 rounded bg-muted flex items-center justify-center">
+                            <Gamepad2 className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 space-y-2">
+                          <Input
+                            value={siteSettings.game_hero_image_url}
+                            onChange={(e) => setSiteSettings({ ...siteSettings, game_hero_image_url: e.target.value })}
+                            placeholder="Image URL"
+                          />
+                          <label className="cursor-pointer inline-block">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleImageUpload(file, "game_hero");
+                              }}
+                            />
+                            <Button variant="outline" size="sm" asChild disabled={uploadingImage === "game_hero"}>
+                              <span>
+                                {uploadingImage === "game_hero" ? (
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                  <Upload className="w-4 h-4 mr-2" />
+                                )}
+                                Upload
+                              </span>
+                            </Button>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* VPS Hosting Hero */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Cloud className="w-4 h-4 text-primary" />
+                        VPS Hosting Hero
+                      </label>
+                      <div className="flex items-center gap-4">
+                        {siteSettings.vps_hero_image_url ? (
+                          <img src={siteSettings.vps_hero_image_url} alt="VPS Hero" className="h-20 w-20 rounded object-contain bg-muted" />
+                        ) : (
+                          <div className="h-20 w-20 rounded bg-muted flex items-center justify-center">
+                            <Cloud className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 space-y-2">
+                          <Input
+                            value={siteSettings.vps_hero_image_url}
+                            onChange={(e) => setSiteSettings({ ...siteSettings, vps_hero_image_url: e.target.value })}
+                            placeholder="Image URL"
+                          />
+                          <label className="cursor-pointer inline-block">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleImageUpload(file, "vps_hero");
+                              }}
+                            />
+                            <Button variant="outline" size="sm" asChild disabled={uploadingImage === "vps_hero"}>
+                              <span>
+                                {uploadingImage === "vps_hero" ? (
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                  <Upload className="w-4 h-4 mr-2" />
+                                )}
+                                Upload
+                              </span>
+                            </Button>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Web Hosting Hero */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-primary" />
+                        Web Hosting Hero
+                      </label>
+                      <div className="flex items-center gap-4">
+                        {siteSettings.web_hero_image_url ? (
+                          <img src={siteSettings.web_hero_image_url} alt="Web Hero" className="h-20 w-20 rounded object-contain bg-muted" />
+                        ) : (
+                          <div className="h-20 w-20 rounded bg-muted flex items-center justify-center">
+                            <Globe className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 space-y-2">
+                          <Input
+                            value={siteSettings.web_hero_image_url}
+                            onChange={(e) => setSiteSettings({ ...siteSettings, web_hero_image_url: e.target.value })}
+                            placeholder="Image URL"
+                          />
+                          <label className="cursor-pointer inline-block">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleImageUpload(file, "web_hero");
+                              }}
+                            />
+                            <Button variant="outline" size="sm" asChild disabled={uploadingImage === "web_hero"}>
+                              <span>
+                                {uploadingImage === "web_hero" ? (
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                  <Upload className="w-4 h-4 mr-2" />
+                                )}
+                                Upload
+                              </span>
+                            </Button>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bot Hosting Hero */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Bot className="w-4 h-4 text-primary" />
+                        Bot Hosting Hero
+                      </label>
+                      <div className="flex items-center gap-4">
+                        {siteSettings.bot_hero_image_url ? (
+                          <img src={siteSettings.bot_hero_image_url} alt="Bot Hero" className="h-20 w-20 rounded object-contain bg-muted" />
+                        ) : (
+                          <div className="h-20 w-20 rounded bg-muted flex items-center justify-center">
+                            <Bot className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 space-y-2">
+                          <Input
+                            value={siteSettings.bot_hero_image_url}
+                            onChange={(e) => setSiteSettings({ ...siteSettings, bot_hero_image_url: e.target.value })}
+                            placeholder="Image URL"
+                          />
+                          <label className="cursor-pointer inline-block">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleImageUpload(file, "bot_hero");
+                              }}
+                            />
+                            <Button variant="outline" size="sm" asChild disabled={uploadingImage === "bot_hero"}>
+                              <span>
+                                {uploadingImage === "bot_hero" ? (
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                  <Upload className="w-4 h-4 mr-2" />
+                                )}
+                                Upload
+                              </span>
+                            </Button>
+                          </label>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>

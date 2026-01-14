@@ -4,7 +4,7 @@ import { HostingPageLayout } from "@/components/HostingPageLayout";
 import { ShockbytePlanCard } from "@/components/ShockbytePlanCard";
 import { BillingToggle, BillingCycle } from "@/components/BillingToggle";
 import { ThunderLoader } from "@/components/ThunderLoader";
-import { Server, Shield, Zap, Cloud, Lock, Cpu, HardDrive } from "lucide-react";
+import { Server, Shield, Zap, Cloud, Cpu, HardDrive } from "lucide-react";
 
 interface Plan {
   id: string;
@@ -34,23 +34,36 @@ export default function VPSHosting() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
+  const [heroImage, setHeroImage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const fetchPlans = async () => {
-      const { data, error } = await supabase
-        .from("hosting_plans")
-        .select("*")
-        .eq("category", "vps")
-        .eq("enabled", true)
-        .order("sort_order", { ascending: true });
+    const fetchData = async () => {
+      const [plansResult, settingsResult] = await Promise.all([
+        supabase
+          .from("hosting_plans")
+          .select("*")
+          .eq("category", "vps")
+          .eq("enabled", true)
+          .order("sort_order", { ascending: true }),
+        supabase
+          .from("site_settings")
+          .select("*")
+          .eq("setting_key", "vps_hero_image_url")
+          .single()
+      ]);
 
-      if (!error && data) {
-        setPlans(data as Plan[]);
+      if (!plansResult.error && plansResult.data) {
+        setPlans(plansResult.data as Plan[]);
       }
+
+      if (!settingsResult.error && settingsResult.data?.setting_value) {
+        setHeroImage(settingsResult.data.setting_value);
+      }
+
       setLoading(false);
     };
 
-    fetchPlans();
+    fetchData();
   }, []);
 
   return (
@@ -61,6 +74,7 @@ export default function VPSHosting() {
       description="Deploy powerful virtual private servers with full root access, your choice of operating system, and enterprise-grade infrastructure. Scale on demand with reliable, high-performance hosting."
       descriptionHighlight="full root access, your choice of operating system,"
       trustBadges={trustBadges}
+      heroImage={heroImage}
     >
       {/* Billing Toggle */}
       <div className="flex justify-end mb-8">
