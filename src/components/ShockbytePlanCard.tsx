@@ -48,8 +48,15 @@ export function ShockbytePlanCard({ plan, index = 0, billingCycle = "monthly" }:
         animation: `slide-up-fade 0.4s ease-out ${index * 60}ms forwards`,
       }}
     >
+      {/* Blurred Background Image */}
+      {plan.image_url && (
+        <div
+          className="absolute inset-0 bg-cover bg-center blur-sm opacity-20 group-hover:opacity-30 transition-opacity duration-300"
+          style={{ backgroundImage: `url(${plan.image_url})` }}
+        />
+      )}
       {/* Card content */}
-      <div className="relative h-full bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-6 transition-all duration-300 group-hover:border-primary/40 group-hover:bg-card/80 flex flex-col">
+      <div className="relative h-full bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-6 transition-all duration-300 group-hover:border-primary/40 group-hover:bg-card/80 flex flex-col z-10">
         {/* Plan Icon & Name */}
         <div className="flex flex-col items-center text-center mb-4">
           {plan.image_url ? (
