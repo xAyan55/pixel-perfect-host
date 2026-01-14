@@ -34,23 +34,36 @@ export default function WebHosting() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
+  const [heroImage, setHeroImage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const fetchPlans = async () => {
-      const { data, error } = await supabase
-        .from("hosting_plans")
-        .select("*")
-        .eq("category", "web")
-        .eq("enabled", true)
-        .order("sort_order", { ascending: true });
+    const fetchData = async () => {
+      const [plansResult, settingsResult] = await Promise.all([
+        supabase
+          .from("hosting_plans")
+          .select("*")
+          .eq("category", "web")
+          .eq("enabled", true)
+          .order("sort_order", { ascending: true }),
+        supabase
+          .from("site_settings")
+          .select("*")
+          .eq("setting_key", "web_hero_image_url")
+          .single()
+      ]);
 
-      if (!error && data) {
-        setPlans(data as Plan[]);
+      if (!plansResult.error && plansResult.data) {
+        setPlans(plansResult.data as Plan[]);
       }
+
+      if (!settingsResult.error && settingsResult.data?.setting_value) {
+        setHeroImage(settingsResult.data.setting_value);
+      }
+
       setLoading(false);
     };
 
-    fetchPlans();
+    fetchData();
   }, []);
 
   return (
@@ -61,6 +74,7 @@ export default function WebHosting() {
       description="Host your websites with blazing-fast speeds, free SSL certificates, and unlimited email accounts. Perfect for blogs, portfolios, e-commerce, and business websites."
       descriptionHighlight="blazing-fast speeds, free SSL certificates,"
       trustBadges={trustBadges}
+      heroImage={heroImage}
     >
       {/* Billing Toggle */}
       <div className="flex justify-end mb-8">

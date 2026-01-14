@@ -5,7 +5,7 @@ import { ShockbytePlanCard } from "@/components/ShockbytePlanCard";
 import { BillingToggle, BillingCycle } from "@/components/BillingToggle";
 import { ThunderLoader } from "@/components/ThunderLoader";
 import { Gamepad2, Shield, Zap, Cloud, Headphones, Package, ShieldCheck } from "lucide-react";
-import heroCharacter from "@/assets/hero-character.png";
+import gameHeroDefault from "@/assets/game-hero.png";
 
 interface Plan {
   id: string;
@@ -35,23 +35,36 @@ export default function GameHosting() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
+  const [heroImage, setHeroImage] = useState<string>(gameHeroDefault);
 
   useEffect(() => {
-    const fetchPlans = async () => {
-      const { data, error } = await supabase
-        .from("hosting_plans")
-        .select("*")
-        .eq("category", "game")
-        .eq("enabled", true)
-        .order("sort_order", { ascending: true });
+    const fetchData = async () => {
+      const [plansResult, settingsResult] = await Promise.all([
+        supabase
+          .from("hosting_plans")
+          .select("*")
+          .eq("category", "game")
+          .eq("enabled", true)
+          .order("sort_order", { ascending: true }),
+        supabase
+          .from("site_settings")
+          .select("*")
+          .eq("setting_key", "game_hero_image_url")
+          .single()
+      ]);
 
-      if (!error && data) {
-        setPlans(data as Plan[]);
+      if (!plansResult.error && plansResult.data) {
+        setPlans(plansResult.data as Plan[]);
       }
+
+      if (!settingsResult.error && settingsResult.data?.setting_value) {
+        setHeroImage(settingsResult.data.setting_value);
+      }
+
       setLoading(false);
     };
 
-    fetchPlans();
+    fetchData();
   }, []);
 
   return (
@@ -62,7 +75,7 @@ export default function GameHosting() {
       description="Easily host your very own Minecraft server with KineticHost. Enjoy reliable, fully customizable and quick to set up servers, perfect for playing with friends or starting a community!"
       descriptionHighlight="reliable, fully customizable and quick to set up servers,"
       trustBadges={trustBadges}
-      heroImage={heroCharacter}
+      heroImage={heroImage}
     >
       {/* Billing Toggle */}
       <div className="flex justify-end mb-8">
