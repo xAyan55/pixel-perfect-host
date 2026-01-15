@@ -3,6 +3,9 @@ import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "./PageTransition";
 import Index from "@/pages/Index";
 import GameHosting from "@/pages/GameHosting";
+import MinecraftHosting from "@/pages/MinecraftHosting";
+import HytaleHosting from "@/pages/HytaleHosting";
+import TerrariaHosting from "@/pages/TerrariaHosting";
 import VPSHosting from "@/pages/VPSHosting";
 import WebHosting from "@/pages/WebHosting";
 import BotHosting from "@/pages/BotHosting";
@@ -37,6 +40,30 @@ export const AnimatedRoutes = () => {
           element={
             <PageTransition>
               <GameHosting />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/game-servers/minecraft"
+          element={
+            <PageTransition>
+              <MinecraftHosting />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/game-servers/hytale"
+          element={
+            <PageTransition>
+              <HytaleHosting />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/game-servers/terraria"
+          element={
+            <PageTransition>
+              <TerrariaHosting />
             </PageTransition>
           }
         />
