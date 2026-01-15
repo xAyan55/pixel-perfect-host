@@ -34,6 +34,7 @@ interface Plan {
   enabled: boolean;
   sort_order: number;
   image_url?: string;
+  game_type?: string;
 }
 
 interface FAQ {
@@ -79,6 +80,9 @@ interface SiteSettings {
   vps_hero_image_url: string;
   web_hero_image_url: string;
   bot_hero_image_url: string;
+  minecraft_hero_image_url: string;
+  hytale_hero_image_url: string;
+  terraria_hero_image_url: string;
 }
 
 const categoryIcons = {
@@ -110,6 +114,7 @@ const emptyPlan: Omit<Plan, "id"> = {
   enabled: true,
   sort_order: 0,
   image_url: "",
+  game_type: "",
 };
 
 const emptyFaq: Omit<FAQ, "id"> = {
@@ -173,6 +178,9 @@ export default function Admin() {
     vps_hero_image_url: "",
     web_hero_image_url: "",
     bot_hero_image_url: "",
+    minecraft_hero_image_url: "",
+    hytale_hero_image_url: "",
+    terraria_hero_image_url: "",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
@@ -275,6 +283,7 @@ export default function Admin() {
           enabled: planData.enabled,
           sort_order: planData.sort_order,
           image_url: planData.image_url,
+          game_type: planData.game_type,
         })
         .eq("id", editingPlan.id);
 
@@ -300,6 +309,7 @@ export default function Admin() {
         enabled: planData.enabled,
         sort_order: planData.sort_order,
         image_url: planData.image_url,
+        game_type: planData.game_type,
       });
 
       if (error) {
@@ -549,7 +559,7 @@ export default function Admin() {
 
   const handleImageUpload = async (
     file: File, 
-    type: "logo" | "panel_preview" | "featured_banner" | "features_section_logo" | "plan" | "game_hero" | "vps_hero" | "web_hero" | "bot_hero",
+    type: "logo" | "panel_preview" | "featured_banner" | "features_section_logo" | "plan" | "game_hero" | "vps_hero" | "web_hero" | "bot_hero" | "minecraft_hero" | "hytale_hero" | "terraria_hero",
     planId?: string
   ) => {
     setUploadingImage(type === "plan" ? planId! : type);
@@ -587,6 +597,12 @@ export default function Admin() {
       setSiteSettings((prev) => ({ ...prev, web_hero_image_url: publicUrl }));
     } else if (type === "bot_hero") {
       setSiteSettings((prev) => ({ ...prev, bot_hero_image_url: publicUrl }));
+    } else if (type === "minecraft_hero") {
+      setSiteSettings((prev) => ({ ...prev, minecraft_hero_image_url: publicUrl }));
+    } else if (type === "hytale_hero") {
+      setSiteSettings((prev) => ({ ...prev, hytale_hero_image_url: publicUrl }));
+    } else if (type === "terraria_hero") {
+      setSiteSettings((prev) => ({ ...prev, terraria_hero_image_url: publicUrl }));
     } else if (type === "plan" && editingPlan) {
       setEditingPlan({ ...editingPlan, image_url: publicUrl });
     }
@@ -1374,6 +1390,148 @@ export default function Admin() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Game-Specific Hero Images */}
+              <Card className="bg-card/50 border-border/50 lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">Game-Specific Hero Images</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <p className="text-sm text-muted-foreground">
+                    Upload hero images for each game type. These appear on individual game hosting pages.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Minecraft Hero */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Gamepad2 className="w-4 h-4 text-green-500" />
+                        Minecraft
+                      </label>
+                      <div className="flex flex-col gap-3">
+                        {siteSettings.minecraft_hero_image_url ? (
+                          <img src={siteSettings.minecraft_hero_image_url} alt="Minecraft Hero" className="h-24 w-full rounded object-cover bg-muted" />
+                        ) : (
+                          <div className="h-24 w-full rounded bg-muted flex items-center justify-center">
+                            <Gamepad2 className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <Input
+                          value={siteSettings.minecraft_hero_image_url}
+                          onChange={(e) => setSiteSettings({ ...siteSettings, minecraft_hero_image_url: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                        <label className="cursor-pointer inline-block">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageUpload(file, "minecraft_hero");
+                            }}
+                          />
+                          <Button variant="outline" size="sm" asChild disabled={uploadingImage === "minecraft_hero"}>
+                            <span>
+                              {uploadingImage === "minecraft_hero" ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <Upload className="w-4 h-4 mr-2" />
+                              )}
+                              Upload
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Hytale Hero */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Gamepad2 className="w-4 h-4 text-purple-500" />
+                        Hytale
+                      </label>
+                      <div className="flex flex-col gap-3">
+                        {siteSettings.hytale_hero_image_url ? (
+                          <img src={siteSettings.hytale_hero_image_url} alt="Hytale Hero" className="h-24 w-full rounded object-cover bg-muted" />
+                        ) : (
+                          <div className="h-24 w-full rounded bg-muted flex items-center justify-center">
+                            <Gamepad2 className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <Input
+                          value={siteSettings.hytale_hero_image_url}
+                          onChange={(e) => setSiteSettings({ ...siteSettings, hytale_hero_image_url: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                        <label className="cursor-pointer inline-block">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageUpload(file, "hytale_hero");
+                            }}
+                          />
+                          <Button variant="outline" size="sm" asChild disabled={uploadingImage === "hytale_hero"}>
+                            <span>
+                              {uploadingImage === "hytale_hero" ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <Upload className="w-4 h-4 mr-2" />
+                              )}
+                              Upload
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Terraria Hero */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Gamepad2 className="w-4 h-4 text-yellow-500" />
+                        Terraria
+                      </label>
+                      <div className="flex flex-col gap-3">
+                        {siteSettings.terraria_hero_image_url ? (
+                          <img src={siteSettings.terraria_hero_image_url} alt="Terraria Hero" className="h-24 w-full rounded object-cover bg-muted" />
+                        ) : (
+                          <div className="h-24 w-full rounded bg-muted flex items-center justify-center">
+                            <Gamepad2 className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <Input
+                          value={siteSettings.terraria_hero_image_url}
+                          onChange={(e) => setSiteSettings({ ...siteSettings, terraria_hero_image_url: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                        <label className="cursor-pointer inline-block">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageUpload(file, "terraria_hero");
+                            }}
+                          />
+                          <Button variant="outline" size="sm" asChild disabled={uploadingImage === "terraria_hero"}>
+                            <span>
+                              {uploadingImage === "terraria_hero" ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <Upload className="w-4 h-4 mr-2" />
+                              )}
+                              Upload
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             <div className="flex justify-end">
@@ -1411,7 +1569,7 @@ export default function Admin() {
                   <select
                     className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                     value={editingPlan.category}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, category: e.target.value as Category })}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, category: e.target.value as Category, game_type: e.target.value !== "game" ? "" : editingPlan.game_type })}
                     disabled={!!editingPlan.id}
                   >
                     <option value="game">Game Hosting</option>
@@ -1421,6 +1579,24 @@ export default function Admin() {
                   </select>
                 </div>
               </div>
+
+              {/* Game Type Selection - Only show for Game Hosting */}
+              {editingPlan.category === "game" && (
+                <div>
+                  <label className="text-sm font-medium">Game Type</label>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                    value={editingPlan.game_type || ""}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, game_type: e.target.value })}
+                  >
+                    <option value="">Select a game...</option>
+                    <option value="minecraft">Minecraft</option>
+                    <option value="hytale">Hytale</option>
+                    <option value="terraria">Terraria</option>
+                  </select>
+                  <p className="text-xs text-muted-foreground mt-1">Plans will appear on the specific game page</p>
+                </div>
+              )}
 
               <div className="grid grid-cols-3 gap-4">
                 <div>

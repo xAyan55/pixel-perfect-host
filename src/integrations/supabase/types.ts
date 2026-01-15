@@ -86,6 +86,7 @@ export type Database = {
           created_at: string
           enabled: boolean | null
           features: string[]
+          game_type: string | null
           id: string
           image_url: string | null
           name: string
@@ -105,6 +106,7 @@ export type Database = {
           created_at?: string
           enabled?: boolean | null
           features?: string[]
+          game_type?: string | null
           id?: string
           image_url?: string | null
           name: string
@@ -124,6 +126,7 @@ export type Database = {
           created_at?: string
           enabled?: boolean | null
           features?: string[]
+          game_type?: string | null
           id?: string
           image_url?: string | null
           name?: string
