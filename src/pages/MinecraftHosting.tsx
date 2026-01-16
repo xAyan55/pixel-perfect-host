@@ -1,105 +1,167 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { HostingPageLayout } from "@/components/HostingPageLayout";
-import { ShockbytePlanCard } from "@/components/ShockbytePlanCard";
-import { BillingToggle, BillingCycle } from "@/components/BillingToggle";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { DynamicBackground } from "@/components/DynamicBackground";
+import { GameSubtypeCard } from "@/components/GameSubtypeCard";
 import { ThunderLoader } from "@/components/ThunderLoader";
-import { Gamepad2, Shield, Zap, Cloud, Headphones, Package, ShieldCheck } from "lucide-react";
+import { Gamepad2, Star, Shield, Zap, Cloud, Headphones, ArrowLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import gameHeroDefault from "@/assets/game-hero.png";
 
-interface Plan {
+interface SubtypeOption {
   id: string;
   name: string;
-  price: number;
-  billing_cycle: string;
-  ram: string;
-  cpu: string;
-  storage: string;
-  bandwidth: string;
-  features: string[];
-  redirect_url: string;
-  popular: boolean;
-  image_url?: string | null;
+  description: string;
+  imageUrl: string;
+  href: string;
+  popular?: boolean;
 }
 
+const defaultSubtypes: SubtypeOption[] = [
+  {
+    id: "java",
+    name: "Java Edition",
+    description: "The classic Minecraft experience with full mod and plugin support.",
+    imageUrl: gameHeroDefault,
+    href: "/game-servers/minecraft/java",
+    popular: true,
+  },
+  {
+    id: "bedrock",
+    name: "Bedrock Edition",
+    description: "Play on mobile, console, and Windows 10 with cross-platform support.",
+    imageUrl: gameHeroDefault,
+    href: "/game-servers/minecraft/bedrock",
+  },
+  {
+    id: "crossplay",
+    name: "Crossplayable",
+    description: "Unite Java and Bedrock players together on one server with Geyser.",
+    imageUrl: gameHeroDefault,
+    href: "/game-servers/minecraft/crossplay",
+  },
+];
+
 const trustBadges = [
-  { icon: <ShieldCheck className="w-4 h-4 text-primary" />, label: "72hr Self-Serve Refund" },
+  { icon: <Shield className="w-4 h-4 text-primary" />, label: "DDoS Protection" },
   { icon: <Zap className="w-4 h-4 text-primary" />, label: "Instant Setup" },
   { icon: <Cloud className="w-4 h-4 text-primary" />, label: "99.9% Uptime" },
   { icon: <Headphones className="w-4 h-4 text-primary" />, label: "24/7 Support" },
-  { icon: <Package className="w-4 h-4 text-primary" />, label: "Instant Modpack & Plugin Installer" },
-  { icon: <Shield className="w-4 h-4 text-primary" />, label: "DDoS Protection" },
 ];
 
 export default function MinecraftHosting() {
-  const [plans, setPlans] = useState<Plan[]>([]);
+  const [subtypes, setSubtypes] = useState<SubtypeOption[]>(defaultSubtypes);
   const [loading, setLoading] = useState(true);
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
-  const [heroImage, setHeroImage] = useState<string>(gameHeroDefault);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const [plansResult, settingsResult] = await Promise.all([
-        supabase
-          .from("hosting_plans")
-          .select("*")
-          .eq("category", "game")
-          .eq("game_type", "minecraft")
-          .eq("enabled", true)
-          .order("sort_order", { ascending: true }),
-        supabase
-          .from("site_settings")
-          .select("*")
-          .eq("setting_key", "minecraft_hero_image_url")
-          .maybeSingle()
-      ]);
+    const fetchHeroImage = async () => {
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("*")
+        .eq("setting_key", "minecraft_hero_image_url")
+        .maybeSingle();
 
-      if (!plansResult.error && plansResult.data) {
-        setPlans(plansResult.data as Plan[]);
+      if (!error && data?.setting_value) {
+        setSubtypes(prev => prev.map(s => ({ ...s, imageUrl: data.setting_value })));
       }
-
-      if (!settingsResult.error && settingsResult.data?.setting_value) {
-        setHeroImage(settingsResult.data.setting_value);
-      }
-
+      
       setLoading(false);
     };
 
-    fetchData();
+    fetchHeroImage();
   }, []);
 
   return (
-    <HostingPageLayout
-      badge={{ icon: <Gamepad2 className="w-8 h-8 text-primary" />, label: "Game Server Hosting" }}
-      title="MINECRAFT"
-      titleHighlight="SERVER HOSTING"
-      description="Easily host your very own Minecraft server with KineticHost. Enjoy reliable, fully customizable and quick to set up servers, perfect for playing with friends or starting a community!"
-      descriptionHighlight="reliable, fully customizable and quick to set up servers,"
-      trustBadges={trustBadges}
-      heroImage={heroImage}
-    >
-      {/* Billing Toggle */}
-      <div className="flex justify-end mb-8">
-        <BillingToggle value={billingCycle} onChange={setBillingCycle} />
-      </div>
-
-      {/* Plans Grid */}
-      {loading ? (
-        <ThunderLoader />
-      ) : plans.length === 0 ? (
-        <p className="text-center text-muted-foreground">No plans available at the moment.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {plans.map((plan, index) => (
-            <ShockbytePlanCard 
-              key={plan.id} 
-              plan={plan} 
-              index={index} 
-              billingCycle={billingCycle}
-            />
-          ))}
-        </div>
-      )}
-    </HostingPageLayout>
+    <div className="min-h-screen bg-background text-foreground relative">
+      <DynamicBackground />
+      <Navbar />
+      
+      <main className="relative z-10">
+        {/* Hero Section */}
+        <section className="pt-32 pb-16 px-4">
+          <div className="container mx-auto max-w-6xl">
+            {/* Back Button */}
+            <Link to="/game-servers" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-6">
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Games</span>
+            </Link>
+            
+            <div className="text-center mb-12">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2 mb-6">
+                <Gamepad2 className="w-5 h-5 text-primary" />
+                <span className="text-sm font-medium text-primary">Minecraft Server Hosting</span>
+              </div>
+              
+              {/* Title */}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6">
+                <span className="text-foreground">CHOOSE YOUR</span>{" "}
+                <span className="text-primary">EDITION</span>
+              </h1>
+              
+              {/* Description */}
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+                Select your Minecraft edition and start hosting with KineticHost. Each edition has{" "}
+                <span className="text-foreground font-medium">specialized plans optimized for the best experience</span>.
+              </p>
+              
+              {/* Trustpilot Rating */}
+              <div className="flex items-center justify-center gap-2 mb-8">
+                <span className="text-sm text-muted-foreground">Rated</span>
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                  ))}
+                </div>
+                <span className="text-sm font-semibold text-foreground">4.9/5</span>
+                <span className="text-sm text-muted-foreground">on Trustpilot</span>
+              </div>
+              
+              {/* Trust Badges */}
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                {trustBadges.map((badge, index) => (
+                  <Badge
+                    key={index}
+                    variant="outline"
+                    className="bg-card/50 border-border/50 text-muted-foreground px-3 py-1.5"
+                  >
+                    {badge.icon}
+                    <span className="ml-2">{badge.label}</span>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* Subtype Selection Grid */}
+        <section className="py-16 px-4">
+          <div className="container mx-auto max-w-6xl">
+            {loading ? (
+              <ThunderLoader />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {subtypes.map((subtype, index) => (
+                  <GameSubtypeCard
+                    key={subtype.id}
+                    name={subtype.name}
+                    description={subtype.description}
+                    imageUrl={subtype.imageUrl}
+                    href={subtype.href}
+                    popular={subtype.popular}
+                    index={index}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
+      
+      <Footer />
+    </div>
   );
 }

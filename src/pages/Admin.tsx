@@ -35,6 +35,7 @@ interface Plan {
   sort_order: number;
   image_url?: string;
   game_type?: string;
+  game_subtype?: string;
 }
 
 interface FAQ {
@@ -115,6 +116,7 @@ const emptyPlan: Omit<Plan, "id"> = {
   sort_order: 0,
   image_url: "",
   game_type: "",
+  game_subtype: "",
 };
 
 const emptyFaq: Omit<FAQ, "id"> = {
@@ -284,6 +286,7 @@ export default function Admin() {
           sort_order: planData.sort_order,
           image_url: planData.image_url,
           game_type: planData.game_type,
+          game_subtype: planData.game_subtype,
         })
         .eq("id", editingPlan.id);
 
@@ -310,6 +313,7 @@ export default function Admin() {
         sort_order: planData.sort_order,
         image_url: planData.image_url,
         game_type: planData.game_type,
+        game_subtype: planData.game_subtype,
       });
 
       if (error) {
@@ -1582,19 +1586,44 @@ export default function Admin() {
 
               {/* Game Type Selection - Only show for Game Hosting */}
               {editingPlan.category === "game" && (
-                <div>
-                  <label className="text-sm font-medium">Game Type</label>
-                  <select
-                    className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
-                    value={editingPlan.game_type || ""}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, game_type: e.target.value })}
-                  >
-                    <option value="">Select a game...</option>
-                    <option value="minecraft">Minecraft</option>
-                    <option value="hytale">Hytale</option>
-                    <option value="terraria">Terraria</option>
-                  </select>
-                  <p className="text-xs text-muted-foreground mt-1">Plans will appear on the specific game page</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Game Type</label>
+                    <select
+                      className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                      value={editingPlan.game_type || ""}
+                      onChange={(e) => setEditingPlan({ ...editingPlan, game_type: e.target.value, game_subtype: "" })}
+                    >
+                      <option value="">Select a game...</option>
+                      <option value="minecraft">Minecraft</option>
+                      <option value="hytale">Hytale</option>
+                      <option value="terraria">Terraria</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Game Subtype</label>
+                    <select
+                      className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                      value={editingPlan.game_subtype || ""}
+                      onChange={(e) => setEditingPlan({ ...editingPlan, game_subtype: e.target.value })}
+                      disabled={!editingPlan.game_type}
+                    >
+                      <option value="">Select subtype...</option>
+                      {editingPlan.game_type === "minecraft" && (
+                        <>
+                          <option value="java">Java Edition</option>
+                          <option value="bedrock">Bedrock Edition</option>
+                          <option value="crossplay">Crossplayable</option>
+                        </>
+                      )}
+                      {(editingPlan.game_type === "hytale" || editingPlan.game_type === "terraria") && (
+                        <>
+                          <option value="budget">Budget</option>
+                          <option value="premium">Premium</option>
+                        </>
+                      )}
+                    </select>
+                  </div>
                 </div>
               )}
 
