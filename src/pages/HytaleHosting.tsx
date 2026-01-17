@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { DynamicBackground } from "@/components/DynamicBackground";
 import { GameSubtypeCard } from "@/components/GameSubtypeCard";
 import { ThunderLoader } from "@/components/ThunderLoader";
+import { SEOHead } from "@/components/SEOHead";
 import { Gamepad2, Star, Shield, Zap, Cloud, Headphones, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
@@ -16,6 +17,7 @@ interface SubtypeOption {
   imageUrl: string;
   href: string;
   popular?: boolean;
+  settingKey: string;
 }
 
 const defaultSubtypes: SubtypeOption[] = [
@@ -25,6 +27,7 @@ const defaultSubtypes: SubtypeOption[] = [
     description: "Affordable hosting perfect for small groups and casual play.",
     imageUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=60",
     href: "/game-servers/hytale/budget",
+    settingKey: "hytale_budget_card_image_url",
   },
   {
     id: "premium",
@@ -33,6 +36,7 @@ const defaultSubtypes: SubtypeOption[] = [
     imageUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=60",
     href: "/game-servers/hytale/premium",
     popular: true,
+    settingKey: "hytale_premium_card_image_url",
   },
 ];
 
@@ -48,25 +52,53 @@ export default function HytaleHosting() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchHeroImage = async () => {
+    const fetchImages = async () => {
+      const keys = [
+        "hytale_budget_card_image_url",
+        "hytale_premium_card_image_url",
+        "hytale_hero_image_url",
+      ];
+      
       const { data, error } = await supabase
         .from("site_settings")
         .select("*")
-        .eq("setting_key", "hytale_hero_image_url")
-        .maybeSingle();
+        .in("setting_key", keys);
 
-      if (!error && data?.setting_value) {
-        setSubtypes(prev => prev.map(s => ({ ...s, imageUrl: data.setting_value })));
+      if (!error && data) {
+        const heroImage = data.find(s => s.setting_key === "hytale_hero_image_url")?.setting_value;
+        
+        setSubtypes(prev => prev.map(s => {
+          const cardImage = data.find(d => d.setting_key === s.settingKey)?.setting_value;
+          return {
+            ...s,
+            imageUrl: cardImage || heroImage || s.imageUrl,
+          };
+        }));
       }
       
       setLoading(false);
     };
 
-    fetchHeroImage();
+    fetchImages();
   }, []);
+
+  const seoJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Hytale Server Hosting",
+    "description": "Premium Hytale server hosting with budget and premium tier options",
+    "brand": { "@type": "Brand", "name": "KineticHost" },
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground relative">
+      <SEOHead
+        title="Hytale Server Hosting | Budget & Premium Plans - KineticHost"
+        description="Get ready for Hytale with KineticHost. Choose between budget-friendly or premium performance servers with instant setup and 24/7 support."
+        keywords="hytale server hosting, hytale game server, hytale hosting, hytale premium server"
+        canonical="https://kinetichost.com/game-servers/hytale"
+        jsonLd={seoJsonLd}
+      />
       <DynamicBackground />
       <Navbar />
       

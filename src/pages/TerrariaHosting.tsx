@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { DynamicBackground } from "@/components/DynamicBackground";
 import { GameSubtypeCard } from "@/components/GameSubtypeCard";
 import { ThunderLoader } from "@/components/ThunderLoader";
+import { SEOHead } from "@/components/SEOHead";
 import { Gamepad2, Star, Shield, Zap, Cloud, Headphones, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
@@ -16,6 +17,7 @@ interface SubtypeOption {
   imageUrl: string;
   href: string;
   popular?: boolean;
+  settingKey: string;
 }
 
 const defaultSubtypes: SubtypeOption[] = [
@@ -25,6 +27,7 @@ const defaultSubtypes: SubtypeOption[] = [
     description: "Affordable hosting perfect for small groups and casual exploration.",
     imageUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=60",
     href: "/game-servers/terraria/budget",
+    settingKey: "terraria_budget_card_image_url",
   },
   {
     id: "premium",
@@ -33,6 +36,7 @@ const defaultSubtypes: SubtypeOption[] = [
     imageUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=60",
     href: "/game-servers/terraria/premium",
     popular: true,
+    settingKey: "terraria_premium_card_image_url",
   },
 ];
 
@@ -48,25 +52,53 @@ export default function TerrariaHosting() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchHeroImage = async () => {
+    const fetchImages = async () => {
+      const keys = [
+        "terraria_budget_card_image_url",
+        "terraria_premium_card_image_url",
+        "terraria_hero_image_url",
+      ];
+      
       const { data, error } = await supabase
         .from("site_settings")
         .select("*")
-        .eq("setting_key", "terraria_hero_image_url")
-        .maybeSingle();
+        .in("setting_key", keys);
 
-      if (!error && data?.setting_value) {
-        setSubtypes(prev => prev.map(s => ({ ...s, imageUrl: data.setting_value })));
+      if (!error && data) {
+        const heroImage = data.find(s => s.setting_key === "terraria_hero_image_url")?.setting_value;
+        
+        setSubtypes(prev => prev.map(s => {
+          const cardImage = data.find(d => d.setting_key === s.settingKey)?.setting_value;
+          return {
+            ...s,
+            imageUrl: cardImage || heroImage || s.imageUrl,
+          };
+        }));
       }
       
       setLoading(false);
     };
 
-    fetchHeroImage();
+    fetchImages();
   }, []);
+
+  const seoJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Terraria Server Hosting",
+    "description": "Premium Terraria server hosting with TShock support and budget/premium options",
+    "brand": { "@type": "Brand", "name": "KineticHost" },
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground relative">
+      <SEOHead
+        title="Terraria Server Hosting | Budget & Premium Plans - KineticHost"
+        description="Host your Terraria server with KineticHost. Choose between budget-friendly or premium performance with TShock pre-installed and 24/7 support."
+        keywords="terraria server hosting, terraria game server, terraria tshock server, terraria multiplayer hosting"
+        canonical="https://kinetichost.com/game-servers/terraria"
+        jsonLd={seoJsonLd}
+      />
       <DynamicBackground />
       <Navbar />
       

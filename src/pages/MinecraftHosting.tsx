@@ -5,9 +5,9 @@ import { Footer } from "@/components/Footer";
 import { DynamicBackground } from "@/components/DynamicBackground";
 import { GameSubtypeCard } from "@/components/GameSubtypeCard";
 import { ThunderLoader } from "@/components/ThunderLoader";
+import { SEOHead } from "@/components/SEOHead";
 import { Gamepad2, Star, Shield, Zap, Cloud, Headphones, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import gameHeroDefault from "@/assets/game-hero.png";
 
@@ -18,6 +18,7 @@ interface SubtypeOption {
   imageUrl: string;
   href: string;
   popular?: boolean;
+  settingKey: string;
 }
 
 const defaultSubtypes: SubtypeOption[] = [
@@ -28,6 +29,7 @@ const defaultSubtypes: SubtypeOption[] = [
     imageUrl: gameHeroDefault,
     href: "/game-servers/minecraft/java",
     popular: true,
+    settingKey: "minecraft_java_card_image_url",
   },
   {
     id: "bedrock",
@@ -35,6 +37,7 @@ const defaultSubtypes: SubtypeOption[] = [
     description: "Play on mobile, console, and Windows 10 with cross-platform support.",
     imageUrl: gameHeroDefault,
     href: "/game-servers/minecraft/bedrock",
+    settingKey: "minecraft_bedrock_card_image_url",
   },
   {
     id: "crossplay",
@@ -42,6 +45,7 @@ const defaultSubtypes: SubtypeOption[] = [
     description: "Unite Java and Bedrock players together on one server with Geyser.",
     imageUrl: gameHeroDefault,
     href: "/game-servers/minecraft/crossplay",
+    settingKey: "minecraft_crossplay_card_image_url",
   },
 ];
 
@@ -57,25 +61,60 @@ export default function MinecraftHosting() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchHeroImage = async () => {
+    const fetchImages = async () => {
+      const keys = [
+        "minecraft_java_card_image_url",
+        "minecraft_bedrock_card_image_url",
+        "minecraft_crossplay_card_image_url",
+        "minecraft_hero_image_url",
+      ];
+      
       const { data, error } = await supabase
         .from("site_settings")
         .select("*")
-        .eq("setting_key", "minecraft_hero_image_url")
-        .maybeSingle();
+        .in("setting_key", keys);
 
-      if (!error && data?.setting_value) {
-        setSubtypes(prev => prev.map(s => ({ ...s, imageUrl: data.setting_value })));
+      if (!error && data) {
+        const heroImage = data.find(s => s.setting_key === "minecraft_hero_image_url")?.setting_value;
+        
+        setSubtypes(prev => prev.map(s => {
+          const cardImage = data.find(d => d.setting_key === s.settingKey)?.setting_value;
+          return {
+            ...s,
+            imageUrl: cardImage || heroImage || s.imageUrl,
+          };
+        }));
       }
       
       setLoading(false);
     };
 
-    fetchHeroImage();
+    fetchImages();
   }, []);
+
+  const seoJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Minecraft Server Hosting",
+    "description": "Premium Minecraft server hosting with Java, Bedrock, and Crossplay support",
+    "brand": { "@type": "Brand", "name": "KineticHost" },
+    "offers": {
+      "@type": "AggregateOffer",
+      "priceCurrency": "USD",
+      "lowPrice": "0",
+      "highPrice": "99",
+    },
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground relative">
+      <SEOHead
+        title="Minecraft Server Hosting | Java, Bedrock, Crossplay - KineticHost"
+        description="Host your Minecraft server with KineticHost. Choose Java Edition, Bedrock Edition, or Crossplayable servers with instant setup and mod support."
+        keywords="minecraft server hosting, minecraft java server, minecraft bedrock server, geyser server, crossplay minecraft"
+        canonical="https://kinetichost.com/game-servers/minecraft"
+        jsonLd={seoJsonLd}
+      />
       <DynamicBackground />
       <Navbar />
       

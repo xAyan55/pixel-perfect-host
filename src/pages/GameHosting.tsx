@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { DynamicBackground } from "@/components/DynamicBackground";
 import { GameCard } from "@/components/GameCard";
 import { ThunderLoader } from "@/components/ThunderLoader";
+import { SEOHead } from "@/components/SEOHead";
 import { Gamepad2, Star, Shield, Zap, Cloud, Headphones } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import gameHeroDefault from "@/assets/game-hero.png";
@@ -56,8 +57,15 @@ export default function GameHosting() {
 
   useEffect(() => {
     const fetchGameImages = async () => {
-      // Fetch custom hero images for each game from site_settings
-      const keys = ["minecraft_hero_image_url", "hytale_hero_image_url", "terraria_hero_image_url"];
+      // Fetch custom card images for each game from site_settings
+      const keys = [
+        "minecraft_card_image_url", 
+        "hytale_card_image_url", 
+        "terraria_card_image_url",
+        "minecraft_hero_image_url", 
+        "hytale_hero_image_url", 
+        "terraria_hero_image_url"
+      ];
       
       const { data, error } = await supabase
         .from("site_settings")
@@ -69,11 +77,20 @@ export default function GameHosting() {
         
         data.forEach((setting) => {
           if (setting.setting_value) {
-            if (setting.setting_key === "minecraft_hero_image_url") {
+            // Prioritize card images over hero images
+            if (setting.setting_key === "minecraft_card_image_url") {
               updatedGames[0].imageUrl = setting.setting_value;
-            } else if (setting.setting_key === "hytale_hero_image_url") {
+            } else if (setting.setting_key === "hytale_card_image_url") {
               updatedGames[1].imageUrl = setting.setting_value;
-            } else if (setting.setting_key === "terraria_hero_image_url") {
+            } else if (setting.setting_key === "terraria_card_image_url") {
+              updatedGames[2].imageUrl = setting.setting_value;
+            } 
+            // Fallback to hero images if card images not set
+            else if (setting.setting_key === "minecraft_hero_image_url" && updatedGames[0].imageUrl === gameHeroDefault) {
+              updatedGames[0].imageUrl = setting.setting_value;
+            } else if (setting.setting_key === "hytale_hero_image_url" && updatedGames[1].imageUrl === defaultGames[1].imageUrl) {
+              updatedGames[1].imageUrl = setting.setting_value;
+            } else if (setting.setting_key === "terraria_hero_image_url" && updatedGames[2].imageUrl === defaultGames[2].imageUrl) {
               updatedGames[2].imageUrl = setting.setting_value;
             }
           }
@@ -88,8 +105,28 @@ export default function GameHosting() {
     fetchGameImages();
   }, []);
 
+  const seoJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Game Server Hosting",
+    "description": "Choose from our selection of game servers including Minecraft, Hytale, and Terraria",
+    "itemListElement": games.map((game, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": game.name,
+      "url": `https://kinetichost.com${game.href}`,
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground relative">
+      <SEOHead
+        title="Game Server Hosting | Minecraft, Hytale, Terraria - KineticHost"
+        description="Host your game servers with KineticHost. Choose from Minecraft, Hytale, and Terraria with instant setup, DDoS protection, and 24/7 support."
+        keywords="game server hosting, minecraft server, hytale server, terraria server, gaming host"
+        canonical="https://kinetichost.com/game-servers"
+        jsonLd={seoJsonLd}
+      />
       <DynamicBackground />
       <Navbar />
       

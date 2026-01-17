@@ -10,10 +10,16 @@ import { Footer } from "@/components/Footer";
 import { AdminButton } from "@/components/AdminButton";
 import { DynamicBackground } from "@/components/DynamicBackground";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { SEOHead } from "@/components/SEOHead";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background relative">
+      <SEOHead 
+        title="KineticHost - Premium Game Server Hosting"
+        description="Your ultimate destination for instantly deployable game servers. Experience fast, secure, and reliable Minecraft, Hytale, and Terraria hosting."
+        canonical="https://kinetichost.com/"
+      />
       {/* Dynamic animated background */}
       <DynamicBackground />
       
