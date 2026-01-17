@@ -84,6 +84,20 @@ interface SiteSettings {
   minecraft_hero_image_url: string;
   hytale_hero_image_url: string;
   terraria_hero_image_url: string;
+  // Game category card images
+  minecraft_card_image_url: string;
+  hytale_card_image_url: string;
+  terraria_card_image_url: string;
+  // Minecraft subtype card images
+  minecraft_java_card_image_url: string;
+  minecraft_bedrock_card_image_url: string;
+  minecraft_crossplay_card_image_url: string;
+  // Hytale subtype card images
+  hytale_budget_card_image_url: string;
+  hytale_premium_card_image_url: string;
+  // Terraria subtype card images
+  terraria_budget_card_image_url: string;
+  terraria_premium_card_image_url: string;
 }
 
 const categoryIcons = {
@@ -183,6 +197,20 @@ export default function Admin() {
     minecraft_hero_image_url: "",
     hytale_hero_image_url: "",
     terraria_hero_image_url: "",
+    // Game category card images
+    minecraft_card_image_url: "",
+    hytale_card_image_url: "",
+    terraria_card_image_url: "",
+    // Minecraft subtype card images
+    minecraft_java_card_image_url: "",
+    minecraft_bedrock_card_image_url: "",
+    minecraft_crossplay_card_image_url: "",
+    // Hytale subtype card images
+    hytale_budget_card_image_url: "",
+    hytale_premium_card_image_url: "",
+    // Terraria subtype card images
+    terraria_budget_card_image_url: "",
+    terraria_premium_card_image_url: "",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
@@ -563,7 +591,7 @@ export default function Admin() {
 
   const handleImageUpload = async (
     file: File, 
-    type: "logo" | "panel_preview" | "featured_banner" | "features_section_logo" | "plan" | "game_hero" | "vps_hero" | "web_hero" | "bot_hero" | "minecraft_hero" | "hytale_hero" | "terraria_hero",
+    type: "logo" | "panel_preview" | "featured_banner" | "features_section_logo" | "plan" | "game_hero" | "vps_hero" | "web_hero" | "bot_hero" | "minecraft_hero" | "hytale_hero" | "terraria_hero" | "minecraft_card" | "hytale_card" | "terraria_card" | "minecraft_java_card" | "minecraft_bedrock_card" | "minecraft_crossplay_card" | "hytale_budget_card" | "hytale_premium_card" | "terraria_budget_card" | "terraria_premium_card",
     planId?: string
   ) => {
     setUploadingImage(type === "plan" ? planId! : type);
@@ -585,30 +613,35 @@ export default function Admin() {
     const { data: urlData } = supabase.storage.from("site-assets").getPublicUrl(filePath);
     const publicUrl = urlData.publicUrl;
 
-    if (type === "logo") {
-      setSiteSettings((prev) => ({ ...prev, logo_url: publicUrl }));
-    } else if (type === "panel_preview") {
-      setSiteSettings((prev) => ({ ...prev, panel_preview_url: publicUrl }));
-    } else if (type === "featured_banner") {
-      setSiteSettings((prev) => ({ ...prev, featured_banner_image_url: publicUrl }));
-    } else if (type === "features_section_logo") {
-      setSiteSettings((prev) => ({ ...prev, features_section_logo_url: publicUrl }));
-    } else if (type === "game_hero") {
-      setSiteSettings((prev) => ({ ...prev, game_hero_image_url: publicUrl }));
-    } else if (type === "vps_hero") {
-      setSiteSettings((prev) => ({ ...prev, vps_hero_image_url: publicUrl }));
-    } else if (type === "web_hero") {
-      setSiteSettings((prev) => ({ ...prev, web_hero_image_url: publicUrl }));
-    } else if (type === "bot_hero") {
-      setSiteSettings((prev) => ({ ...prev, bot_hero_image_url: publicUrl }));
-    } else if (type === "minecraft_hero") {
-      setSiteSettings((prev) => ({ ...prev, minecraft_hero_image_url: publicUrl }));
-    } else if (type === "hytale_hero") {
-      setSiteSettings((prev) => ({ ...prev, hytale_hero_image_url: publicUrl }));
-    } else if (type === "terraria_hero") {
-      setSiteSettings((prev) => ({ ...prev, terraria_hero_image_url: publicUrl }));
-    } else if (type === "plan" && editingPlan) {
+    // Map type to setting key
+    const typeToSettingKey: Record<string, keyof SiteSettings> = {
+      logo: "logo_url",
+      panel_preview: "panel_preview_url",
+      featured_banner: "featured_banner_image_url",
+      features_section_logo: "features_section_logo_url",
+      game_hero: "game_hero_image_url",
+      vps_hero: "vps_hero_image_url",
+      web_hero: "web_hero_image_url",
+      bot_hero: "bot_hero_image_url",
+      minecraft_hero: "minecraft_hero_image_url",
+      hytale_hero: "hytale_hero_image_url",
+      terraria_hero: "terraria_hero_image_url",
+      minecraft_card: "minecraft_card_image_url",
+      hytale_card: "hytale_card_image_url",
+      terraria_card: "terraria_card_image_url",
+      minecraft_java_card: "minecraft_java_card_image_url",
+      minecraft_bedrock_card: "minecraft_bedrock_card_image_url",
+      minecraft_crossplay_card: "minecraft_crossplay_card_image_url",
+      hytale_budget_card: "hytale_budget_card_image_url",
+      hytale_premium_card: "hytale_premium_card_image_url",
+      terraria_budget_card: "terraria_budget_card_image_url",
+      terraria_premium_card: "terraria_premium_card_image_url",
+    };
+
+    if (type === "plan" && editingPlan) {
       setEditingPlan({ ...editingPlan, image_url: publicUrl });
+    } else if (typeToSettingKey[type]) {
+      setSiteSettings((prev) => ({ ...prev, [typeToSettingKey[type]]: publicUrl }));
     }
 
     toast({ title: "Success", description: "Image uploaded successfully" });
@@ -1531,6 +1564,323 @@ export default function Admin() {
                             </span>
                           </Button>
                         </label>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Game Category Card Images */}
+              <Card className="bg-card/50 border-border/50 lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">Game Category Card Images</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <p className="text-sm text-muted-foreground">
+                    These images appear on the game selection cards in /game-servers page.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Minecraft Card */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Gamepad2 className="w-4 h-4 text-green-500" />
+                        Minecraft Card
+                      </label>
+                      <div className="flex flex-col gap-3">
+                        {siteSettings.minecraft_card_image_url ? (
+                          <img src={siteSettings.minecraft_card_image_url} alt="Minecraft Card" className="h-24 w-full rounded object-cover bg-muted" />
+                        ) : (
+                          <div className="h-24 w-full rounded bg-muted flex items-center justify-center">
+                            <Gamepad2 className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <Input
+                          value={siteSettings.minecraft_card_image_url}
+                          onChange={(e) => setSiteSettings({ ...siteSettings, minecraft_card_image_url: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                        <label className="cursor-pointer inline-block">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageUpload(file, "minecraft_card");
+                            }}
+                          />
+                          <Button variant="outline" size="sm" asChild disabled={uploadingImage === "minecraft_card"}>
+                            <span>
+                              {uploadingImage === "minecraft_card" ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <Upload className="w-4 h-4 mr-2" />
+                              )}
+                              Upload
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Hytale Card */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Gamepad2 className="w-4 h-4 text-purple-500" />
+                        Hytale Card
+                      </label>
+                      <div className="flex flex-col gap-3">
+                        {siteSettings.hytale_card_image_url ? (
+                          <img src={siteSettings.hytale_card_image_url} alt="Hytale Card" className="h-24 w-full rounded object-cover bg-muted" />
+                        ) : (
+                          <div className="h-24 w-full rounded bg-muted flex items-center justify-center">
+                            <Gamepad2 className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <Input
+                          value={siteSettings.hytale_card_image_url}
+                          onChange={(e) => setSiteSettings({ ...siteSettings, hytale_card_image_url: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                        <label className="cursor-pointer inline-block">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageUpload(file, "hytale_card");
+                            }}
+                          />
+                          <Button variant="outline" size="sm" asChild disabled={uploadingImage === "hytale_card"}>
+                            <span>
+                              {uploadingImage === "hytale_card" ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <Upload className="w-4 h-4 mr-2" />
+                              )}
+                              Upload
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Terraria Card */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Gamepad2 className="w-4 h-4 text-yellow-500" />
+                        Terraria Card
+                      </label>
+                      <div className="flex flex-col gap-3">
+                        {siteSettings.terraria_card_image_url ? (
+                          <img src={siteSettings.terraria_card_image_url} alt="Terraria Card" className="h-24 w-full rounded object-cover bg-muted" />
+                        ) : (
+                          <div className="h-24 w-full rounded bg-muted flex items-center justify-center">
+                            <Gamepad2 className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <Input
+                          value={siteSettings.terraria_card_image_url}
+                          onChange={(e) => setSiteSettings({ ...siteSettings, terraria_card_image_url: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                        <label className="cursor-pointer inline-block">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageUpload(file, "terraria_card");
+                            }}
+                          />
+                          <Button variant="outline" size="sm" asChild disabled={uploadingImage === "terraria_card"}>
+                            <span>
+                              {uploadingImage === "terraria_card" ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <Upload className="w-4 h-4 mr-2" />
+                              )}
+                              Upload
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Minecraft Subtype Card Images */}
+              <Card className="bg-card/50 border-border/50 lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">Minecraft Edition Card Images</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <p className="text-sm text-muted-foreground">
+                    These images appear on the edition selection cards in /game-servers/minecraft page.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Java Edition */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium">Java Edition</label>
+                      <div className="flex flex-col gap-3">
+                        {siteSettings.minecraft_java_card_image_url ? (
+                          <img src={siteSettings.minecraft_java_card_image_url} alt="Java Edition" className="h-24 w-full rounded object-cover bg-muted" />
+                        ) : (
+                          <div className="h-24 w-full rounded bg-muted flex items-center justify-center">
+                            <Gamepad2 className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <Input
+                          value={siteSettings.minecraft_java_card_image_url}
+                          onChange={(e) => setSiteSettings({ ...siteSettings, minecraft_java_card_image_url: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                        <label className="cursor-pointer inline-block">
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, "minecraft_java_card"); }} />
+                          <Button variant="outline" size="sm" asChild disabled={uploadingImage === "minecraft_java_card"}>
+                            <span>{uploadingImage === "minecraft_java_card" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}Upload</span>
+                          </Button>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Bedrock Edition */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium">Bedrock Edition</label>
+                      <div className="flex flex-col gap-3">
+                        {siteSettings.minecraft_bedrock_card_image_url ? (
+                          <img src={siteSettings.minecraft_bedrock_card_image_url} alt="Bedrock Edition" className="h-24 w-full rounded object-cover bg-muted" />
+                        ) : (
+                          <div className="h-24 w-full rounded bg-muted flex items-center justify-center">
+                            <Gamepad2 className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <Input
+                          value={siteSettings.minecraft_bedrock_card_image_url}
+                          onChange={(e) => setSiteSettings({ ...siteSettings, minecraft_bedrock_card_image_url: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                        <label className="cursor-pointer inline-block">
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, "minecraft_bedrock_card"); }} />
+                          <Button variant="outline" size="sm" asChild disabled={uploadingImage === "minecraft_bedrock_card"}>
+                            <span>{uploadingImage === "minecraft_bedrock_card" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}Upload</span>
+                          </Button>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Crossplay */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium">Crossplayable</label>
+                      <div className="flex flex-col gap-3">
+                        {siteSettings.minecraft_crossplay_card_image_url ? (
+                          <img src={siteSettings.minecraft_crossplay_card_image_url} alt="Crossplayable" className="h-24 w-full rounded object-cover bg-muted" />
+                        ) : (
+                          <div className="h-24 w-full rounded bg-muted flex items-center justify-center">
+                            <Gamepad2 className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <Input
+                          value={siteSettings.minecraft_crossplay_card_image_url}
+                          onChange={(e) => setSiteSettings({ ...siteSettings, minecraft_crossplay_card_image_url: e.target.value })}
+                          placeholder="Image URL"
+                        />
+                        <label className="cursor-pointer inline-block">
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, "minecraft_crossplay_card"); }} />
+                          <Button variant="outline" size="sm" asChild disabled={uploadingImage === "minecraft_crossplay_card"}>
+                            <span>{uploadingImage === "minecraft_crossplay_card" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}Upload</span>
+                          </Button>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Hytale & Terraria Subtype Card Images */}
+              <Card className="bg-card/50 border-border/50 lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">Hytale & Terraria Tier Card Images</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <p className="text-sm text-muted-foreground">
+                    These images appear on the tier selection cards (Budget/Premium) in game pages.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Hytale Section */}
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-semibold text-purple-400">Hytale Tiers</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium">Budget</label>
+                          {siteSettings.hytale_budget_card_image_url ? (
+                            <img src={siteSettings.hytale_budget_card_image_url} alt="Hytale Budget" className="h-16 w-full rounded object-cover bg-muted" />
+                          ) : (
+                            <div className="h-16 w-full rounded bg-muted flex items-center justify-center"><Gamepad2 className="w-6 h-6 text-muted-foreground" /></div>
+                          )}
+                          <Input value={siteSettings.hytale_budget_card_image_url} onChange={(e) => setSiteSettings({ ...siteSettings, hytale_budget_card_image_url: e.target.value })} placeholder="URL" className="text-xs" />
+                          <label className="cursor-pointer inline-block">
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, "hytale_budget_card"); }} />
+                            <Button variant="outline" size="sm" asChild disabled={uploadingImage === "hytale_budget_card"}>
+                              <span className="text-xs">{uploadingImage === "hytale_budget_card" ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Upload className="w-3 h-3 mr-1" />}Upload</span>
+                            </Button>
+                          </label>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium">Premium</label>
+                          {siteSettings.hytale_premium_card_image_url ? (
+                            <img src={siteSettings.hytale_premium_card_image_url} alt="Hytale Premium" className="h-16 w-full rounded object-cover bg-muted" />
+                          ) : (
+                            <div className="h-16 w-full rounded bg-muted flex items-center justify-center"><Gamepad2 className="w-6 h-6 text-muted-foreground" /></div>
+                          )}
+                          <Input value={siteSettings.hytale_premium_card_image_url} onChange={(e) => setSiteSettings({ ...siteSettings, hytale_premium_card_image_url: e.target.value })} placeholder="URL" className="text-xs" />
+                          <label className="cursor-pointer inline-block">
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, "hytale_premium_card"); }} />
+                            <Button variant="outline" size="sm" asChild disabled={uploadingImage === "hytale_premium_card"}>
+                              <span className="text-xs">{uploadingImage === "hytale_premium_card" ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Upload className="w-3 h-3 mr-1" />}Upload</span>
+                            </Button>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Terraria Section */}
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-semibold text-yellow-400">Terraria Tiers</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium">Budget</label>
+                          {siteSettings.terraria_budget_card_image_url ? (
+                            <img src={siteSettings.terraria_budget_card_image_url} alt="Terraria Budget" className="h-16 w-full rounded object-cover bg-muted" />
+                          ) : (
+                            <div className="h-16 w-full rounded bg-muted flex items-center justify-center"><Gamepad2 className="w-6 h-6 text-muted-foreground" /></div>
+                          )}
+                          <Input value={siteSettings.terraria_budget_card_image_url} onChange={(e) => setSiteSettings({ ...siteSettings, terraria_budget_card_image_url: e.target.value })} placeholder="URL" className="text-xs" />
+                          <label className="cursor-pointer inline-block">
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, "terraria_budget_card"); }} />
+                            <Button variant="outline" size="sm" asChild disabled={uploadingImage === "terraria_budget_card"}>
+                              <span className="text-xs">{uploadingImage === "terraria_budget_card" ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Upload className="w-3 h-3 mr-1" />}Upload</span>
+                            </Button>
+                          </label>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium">Premium</label>
+                          {siteSettings.terraria_premium_card_image_url ? (
+                            <img src={siteSettings.terraria_premium_card_image_url} alt="Terraria Premium" className="h-16 w-full rounded object-cover bg-muted" />
+                          ) : (
+                            <div className="h-16 w-full rounded bg-muted flex items-center justify-center"><Gamepad2 className="w-6 h-6 text-muted-foreground" /></div>
+                          )}
+                          <Input value={siteSettings.terraria_premium_card_image_url} onChange={(e) => setSiteSettings({ ...siteSettings, terraria_premium_card_image_url: e.target.value })} placeholder="URL" className="text-xs" />
+                          <label className="cursor-pointer inline-block">
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, "terraria_premium_card"); }} />
+                            <Button variant="outline" size="sm" asChild disabled={uploadingImage === "terraria_premium_card"}>
+                              <span className="text-xs">{uploadingImage === "terraria_premium_card" ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Upload className="w-3 h-3 mr-1" />}Upload</span>
+                            </Button>
+                          </label>
+                        </div>
                       </div>
                     </div>
                   </div>
