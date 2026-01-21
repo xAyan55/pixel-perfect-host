@@ -8,6 +8,7 @@ interface SEOHeadProps {
   ogImage?: string;
   ogType?: string;
   jsonLd?: object;
+  favicon?: string;
 }
 
 export function SEOHead({
@@ -18,6 +19,7 @@ export function SEOHead({
   ogImage = "/og-image.png",
   ogType = "website",
   jsonLd,
+  favicon,
 }: SEOHeadProps) {
   useEffect(() => {
     // Update document title
@@ -68,6 +70,19 @@ export function SEOHead({
       }
     }
 
+    // Favicon
+    if (favicon) {
+      let link = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+      if (link) {
+        link.href = favicon;
+      } else {
+        link = document.createElement("link");
+        link.rel = "icon";
+        link.href = favicon;
+        document.head.appendChild(link);
+      }
+    }
+
     // JSON-LD structured data
     if (jsonLd) {
       const existingScript = document.querySelector('script[type="application/ld+json"]');
@@ -85,7 +100,7 @@ export function SEOHead({
     return () => {
       // We don't remove tags on unmount to avoid flickering
     };
-  }, [title, description, keywords, canonical, ogImage, ogType, jsonLd]);
+  }, [title, description, keywords, canonical, ogImage, ogType, jsonLd, favicon]);
 
   return null;
 }

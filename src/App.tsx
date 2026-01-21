@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AnimatedRoutes } from "@/components/AnimatedRoutes";
 import { CookieConsent } from "@/components/CookieConsent";
+import { FaviconLoader } from "@/components/FaviconLoader";
 
 const queryClient = new QueryClient();
 
@@ -15,6 +16,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <FaviconLoader />
         <BrowserRouter>
           <AnimatedRoutes />
         </BrowserRouter>
