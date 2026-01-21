@@ -69,6 +69,7 @@ interface SiteSettings {
   free_server_url: string;
   free_server_enabled: string;
   logo_url: string;
+  favicon_url: string;
   panel_preview_url: string;
   control_panel_url: string;
   featured_banner_title: string;
@@ -182,6 +183,7 @@ export default function Admin() {
     free_server_url: "",
     free_server_enabled: "true",
     logo_url: "",
+    favicon_url: "",
     panel_preview_url: "",
     control_panel_url: "",
     featured_banner_title: "UPDATE AVAILABLE",
@@ -591,7 +593,7 @@ export default function Admin() {
 
   const handleImageUpload = async (
     file: File, 
-    type: "logo" | "panel_preview" | "featured_banner" | "features_section_logo" | "plan" | "game_hero" | "vps_hero" | "web_hero" | "bot_hero" | "minecraft_hero" | "hytale_hero" | "terraria_hero" | "minecraft_card" | "hytale_card" | "terraria_card" | "minecraft_java_card" | "minecraft_bedrock_card" | "minecraft_crossplay_card" | "hytale_budget_card" | "hytale_premium_card" | "terraria_budget_card" | "terraria_premium_card",
+    type: "logo" | "favicon" | "panel_preview" | "featured_banner" | "features_section_logo" | "plan" | "game_hero" | "vps_hero" | "web_hero" | "bot_hero" | "minecraft_hero" | "hytale_hero" | "terraria_hero" | "minecraft_card" | "hytale_card" | "terraria_card" | "minecraft_java_card" | "minecraft_bedrock_card" | "minecraft_crossplay_card" | "hytale_budget_card" | "hytale_premium_card" | "terraria_budget_card" | "terraria_premium_card",
     planId?: string
   ) => {
     setUploadingImage(type === "plan" ? planId! : type);
@@ -616,6 +618,7 @@ export default function Admin() {
     // Map type to setting key
     const typeToSettingKey: Record<string, keyof SiteSettings> = {
       logo: "logo_url",
+      favicon: "favicon_url",
       panel_preview: "panel_preview_url",
       featured_banner: "featured_banner_image_url",
       features_section_logo: "features_section_logo_url",
@@ -1057,6 +1060,55 @@ export default function Admin() {
                               <Upload className="w-4 h-4 mr-2" />
                             )}
                             Upload Logo
+                          </span>
+                        </Button>
+                      </label>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/50 border-border/50">
+                <CardHeader>
+                  <CardTitle className="text-lg">Site Favicon</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    The favicon appears in browser tabs and bookmarks. Recommended size: 32x32 or 64x64 pixels.
+                  </p>
+                  <div className="flex items-center gap-4">
+                    {siteSettings.favicon_url ? (
+                      <img src={siteSettings.favicon_url} alt="Favicon" className="h-12 w-12 rounded object-contain bg-muted p-1" />
+                    ) : (
+                      <div className="h-12 w-12 rounded bg-muted flex items-center justify-center">
+                        <Image className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <Input
+                        value={siteSettings.favicon_url}
+                        onChange={(e) => setSiteSettings({ ...siteSettings, favicon_url: e.target.value })}
+                        placeholder="Favicon URL"
+                        className="mb-2"
+                      />
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*,.ico"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(file, "favicon");
+                          }}
+                        />
+                        <Button variant="outline" size="sm" asChild disabled={uploadingImage === "favicon"}>
+                          <span>
+                            {uploadingImage === "favicon" ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <Upload className="w-4 h-4 mr-2" />
+                            )}
+                            Upload Favicon
                           </span>
                         </Button>
                       </label>
