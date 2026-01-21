@@ -68,48 +68,39 @@ export const FeaturedBanner = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Top Banner - UPDATE AVAILABLE Section */}
-      <div className="relative group rounded-2xl overflow-hidden">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-card to-accent/10 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-t from-card/90 via-transparent to-transparent pointer-events-none" />
+      {/* Top Banner - UPDATE AVAILABLE Section with Background Image */}
+      <div className="relative group rounded-2xl overflow-hidden min-h-[180px] md:min-h-[200px]">
+        {/* Background Image */}
+        {bannerImage && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 group-hover:scale-105"
+            style={{ backgroundImage: `url(${bannerImage})` }}
+          />
+        )}
         
-        <div className="relative p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 min-h-[160px] md:min-h-[180px]">
-          {/* Left Content */}
-          <div className="flex-1 text-center md:text-left z-10">
+        {/* Gradient overlays for readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-card/95 via-card/80 to-card/40 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-card/90 via-transparent to-card/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
+        
+        {/* Animated border glow */}
+        <div className="absolute inset-0 rounded-2xl border border-primary/20 group-hover:border-primary/40 transition-colors duration-300" />
+        
+        <div className="relative p-6 md:p-8 flex flex-col justify-center h-full min-h-[180px] md:min-h-[200px]">
+          {/* Content */}
+          <div className="text-left z-10 max-w-[60%]">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 border border-primary/30 mb-3">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/30 backdrop-blur-sm border border-primary/40 mb-3 shadow-lg shadow-primary/10">
+              <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" />
               <span className="text-xs font-bold text-primary tracking-wider uppercase">
                 {settings.featured_banner_title || "UPDATE AVAILABLE"}
               </span>
             </div>
             
             {/* Title */}
-            <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">
+            <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground drop-shadow-lg">
               {settings.featured_banner_subtitle || "Mounts of Mayhem"}
             </h3>
-          </div>
-          
-          {/* Right - Floating Image */}
-          <div className="flex-shrink-0 relative">
-            {bannerImage ? (
-              <div className="relative">
-                <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 opacity-50" />
-                <img 
-                  src={bannerImage} 
-                  alt="Featured" 
-                  className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 object-contain drop-shadow-[0_10px_30px_rgba(59,130,246,0.3)] transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
-            ) : (
-              <div className="relative">
-                <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
-                <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/10 border border-primary/20 flex items-center justify-center">
-                  <Server className="w-16 h-16 text-primary" />
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
