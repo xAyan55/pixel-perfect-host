@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Cookie, X } from "lucide-react";
 
@@ -56,7 +57,13 @@ export const CookieConsent = () => {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 We use cookies and similar technologies to enhance your browsing experience, 
                 analyze site traffic, and personalize content. By clicking "Accept All", 
-                you consent to our use of cookies.
+                you consent to our use of cookies.{" "}
+                <Link 
+                  to="/privacy-policy" 
+                  className="text-primary hover:text-primary/80 underline underline-offset-2"
+                >
+                  Read our Privacy Policy
+                </Link>
               </p>
             </div>
 
