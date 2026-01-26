@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   LogOut, Plus, Pencil, Trash2, Gamepad2, Cloud, Globe, Bot,
   Loader2, Save, X, HardDrive, Cpu, Wifi, Settings, Upload, Image,
-  HelpCircle, Link as LinkIcon, Sparkles
+  HelpCircle, Link as LinkIcon, Sparkles, Shield
 } from "lucide-react";
 
 type Category = "game" | "vps" | "web" | "bot";
@@ -99,6 +99,10 @@ interface SiteSettings {
   // Terraria subtype card images
   terraria_budget_card_image_url: string;
   terraria_premium_card_image_url: string;
+  // Privacy Policy
+  privacy_policy_title: string;
+  privacy_policy_content: string;
+  privacy_policy_last_updated: string;
 }
 
 const categoryIcons = {
@@ -213,6 +217,10 @@ export default function Admin() {
     // Terraria subtype card images
     terraria_budget_card_image_url: "",
     terraria_premium_card_image_url: "",
+    // Privacy Policy
+    privacy_policy_title: "Privacy Policy",
+    privacy_policy_content: "",
+    privacy_policy_last_updated: new Date().toISOString().split("T")[0],
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
@@ -715,6 +723,10 @@ export default function Admin() {
               <LinkIcon className="w-4 h-4 mr-2" />
               Social
             </TabsTrigger>
+            <TabsTrigger value="privacy" className="data-[state=active]:bg-primary">
+              <Shield className="w-4 h-4 mr-2" />
+              Privacy
+            </TabsTrigger>
             <TabsTrigger value="settings" className="data-[state=active]:bg-primary">
               <Settings className="w-4 h-4 mr-2" />
               Settings
@@ -974,6 +986,71 @@ export default function Admin() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          {/* Privacy Tab */}
+          <TabsContent value="privacy" className="space-y-6">
+            <div className="grid gap-6">
+              <Card className="bg-card/50 border-border/50">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-primary" />
+                    Privacy Policy Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">Page Title</label>
+                      <Input
+                        value={siteSettings.privacy_policy_title}
+                        onChange={(e) => setSiteSettings({ ...siteSettings, privacy_policy_title: e.target.value })}
+                        placeholder="Privacy Policy"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Last Updated Date</label>
+                      <Input
+                        type="date"
+                        value={siteSettings.privacy_policy_last_updated}
+                        onChange={(e) => setSiteSettings({ ...siteSettings, privacy_policy_last_updated: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Privacy Policy Content</label>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Use Markdown-like formatting: ## for headings, ### for subheadings, **text** for bold, - for bullet points
+                    </p>
+                    <textarea
+                      className="w-full min-h-[400px] px-3 py-2 rounded-md border border-input bg-background text-sm font-mono"
+                      value={siteSettings.privacy_policy_content}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, privacy_policy_content: e.target.value })}
+                      placeholder={`## Introduction
+
+Welcome to our website. We respect your privacy...
+
+## Information We Collect
+
+### Personal Information
+- Name and email address
+- Billing information
+
+## Cookies and Tracking
+
+We use cookies to enhance your experience...`}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="flex justify-end">
+              <Button onClick={handleSaveSettings} disabled={savingSettings}>
+                {savingSettings ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                Save Privacy Policy
+              </Button>
+            </div>
           </TabsContent>
 
           {/* Settings Tab */}

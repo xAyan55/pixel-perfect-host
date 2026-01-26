@@ -16,6 +16,7 @@ import TerrariaPremiumHosting from "@/pages/TerrariaPremiumHosting";
 import VPSHosting from "@/pages/VPSHosting";
 import WebHosting from "@/pages/WebHosting";
 import BotHosting from "@/pages/BotHosting";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import AdminLogin from "@/pages/AdminLogin";
 import Admin from "@/pages/Admin";
 import NotFound from "@/pages/NotFound";
@@ -151,6 +152,14 @@ export const AnimatedRoutes = () => {
           element={
             <PageTransition>
               <BotHosting />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/privacy-policy"
+          element={
+            <PageTransition>
+              <PrivacyPolicy />
             </PageTransition>
           }
         />
