@@ -4,15 +4,8 @@ import { PageTransition } from "./PageTransition";
 import Index from "@/pages/Index";
 import GameHosting from "@/pages/GameHosting";
 import MinecraftHosting from "@/pages/MinecraftHosting";
-import MinecraftJavaHosting from "@/pages/MinecraftJavaHosting";
-import MinecraftBedrockHosting from "@/pages/MinecraftBedrockHosting";
-import MinecraftCrossplayHosting from "@/pages/MinecraftCrossplayHosting";
 import HytaleHosting from "@/pages/HytaleHosting";
-import HytaleBudgetHosting from "@/pages/HytaleBudgetHosting";
-import HytalePremiumHosting from "@/pages/HytalePremiumHosting";
 import TerrariaHosting from "@/pages/TerrariaHosting";
-import TerrariaBudgetHosting from "@/pages/TerrariaBudgetHosting";
-import TerrariaPremiumHosting from "@/pages/TerrariaPremiumHosting";
 import VPSHosting from "@/pages/VPSHosting";
 import WebHosting from "@/pages/WebHosting";
 import BotHosting from "@/pages/BotHosting";
@@ -60,30 +53,6 @@ export const AnimatedRoutes = () => {
           }
         />
         <Route
-          path="/game-servers/minecraft/java"
-          element={
-            <PageTransition>
-              <MinecraftJavaHosting />
-            </PageTransition>
-          }
-        />
-        <Route
-          path="/game-servers/minecraft/bedrock"
-          element={
-            <PageTransition>
-              <MinecraftBedrockHosting />
-            </PageTransition>
-          }
-        />
-        <Route
-          path="/game-servers/minecraft/crossplay"
-          element={
-            <PageTransition>
-              <MinecraftCrossplayHosting />
-            </PageTransition>
-          }
-        />
-        <Route
           path="/game-servers/hytale"
           element={
             <PageTransition>
@@ -92,42 +61,10 @@ export const AnimatedRoutes = () => {
           }
         />
         <Route
-          path="/game-servers/hytale/budget"
-          element={
-            <PageTransition>
-              <HytaleBudgetHosting />
-            </PageTransition>
-          }
-        />
-        <Route
-          path="/game-servers/hytale/premium"
-          element={
-            <PageTransition>
-              <HytalePremiumHosting />
-            </PageTransition>
-          }
-        />
-        <Route
           path="/game-servers/terraria"
           element={
             <PageTransition>
               <TerrariaHosting />
-            </PageTransition>
-          }
-        />
-        <Route
-          path="/game-servers/terraria/budget"
-          element={
-            <PageTransition>
-              <TerrariaBudgetHosting />
-            </PageTransition>
-          }
-        />
-        <Route
-          path="/game-servers/terraria/premium"
-          element={
-            <PageTransition>
-              <TerrariaPremiumHosting />
             </PageTransition>
           }
         />
