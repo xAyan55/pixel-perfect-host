@@ -131,7 +131,7 @@ export const HeroSection = () => {
               <img
                 src={heroCharacter}
                 alt="Minecraft Character"
-                className="relative z-10 w-48 sm:w-64 md:w-80 lg:w-full max-w-lg drop-shadow-2xl transition-all duration-700 group-hover:scale-105 animate-float-slow"
+                className="relative z-10 w-48 sm:w-64 md:w-80 lg:w-full max-w-lg drop-shadow-2xl transition-all duration-700 group-hover:scale-105"
               />
             </div>
           </div>
