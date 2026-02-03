@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AnimatedRoutes } from "@/components/AnimatedRoutes";
 import { CookieConsent } from "@/components/CookieConsent";
 import { FaviconLoader } from "@/components/FaviconLoader";
+import { ChatbotWidget } from "@/components/ChatbotWidget";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
         <BrowserRouter>
           <AnimatedRoutes />
           <CookieConsent />
+          <ChatbotWidget />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
