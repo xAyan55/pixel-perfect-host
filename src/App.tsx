@@ -19,8 +19,8 @@ const App = () => (
         <FaviconLoader />
         <BrowserRouter>
           <AnimatedRoutes />
+          <CookieConsent />
         </BrowserRouter>
-        <CookieConsent />
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
