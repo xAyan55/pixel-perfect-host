@@ -7,7 +7,6 @@ import { FeaturesSection } from "@/components/FeaturesSection";
 import { SolutionsSection } from "@/components/SolutionsSection";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
-import { AdminButton } from "@/components/AdminButton";
 import { DynamicBackground } from "@/components/DynamicBackground";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { SEOHead } from "@/components/SEOHead";
@@ -34,7 +33,6 @@ const Index = () => {
         <CTASection />
       </main>
       <Footer />
-      <AdminButton />
       
       {/* Mobile bottom navigation */}
       <MobileBottomNav />
