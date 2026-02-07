@@ -13,8 +13,9 @@ import { useToast } from "@/hooks/use-toast";
 import {
   LogOut, Plus, Pencil, Trash2, Gamepad2, Cloud, Globe, Bot,
   Loader2, Save, X, HardDrive, Cpu, Wifi, Settings, Upload, Image,
-  HelpCircle, Link as LinkIcon, Sparkles, Shield
+  HelpCircle, Link as LinkIcon, Sparkles, Shield, Server
 } from "lucide-react";
+import { PterodactylPanel } from "@/components/admin/PterodactylPanel";
 
 type Category = "game" | "vps" | "web" | "bot";
 
@@ -730,6 +731,10 @@ export default function Admin() {
             <TabsTrigger value="settings" className="data-[state=active]:bg-primary">
               <Settings className="w-4 h-4 mr-2" />
               Settings
+            </TabsTrigger>
+            <TabsTrigger value="pterodactyl" className="data-[state=active]:bg-primary">
+              <Server className="w-4 h-4 mr-2" />
+              Panel
             </TabsTrigger>
           </TabsList>
 
@@ -2023,6 +2028,11 @@ We use cookies to enhance your experience...`}
                 Save Settings
               </Button>
             </div>
+          </TabsContent>
+
+          {/* Pterodactyl Panel Tab */}
+          <TabsContent value="pterodactyl" className="space-y-6">
+            <PterodactylPanel />
           </TabsContent>
         </Tabs>
       </main>
