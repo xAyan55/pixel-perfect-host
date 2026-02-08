@@ -2,3 +2,12 @@ project_id = "odlvexeolcvpdiovgicj"
 
 [functions.setup-admin]
 verify_jwt = false
+
+[functions.pterodactyl]
+verify_jwt = false
+
+[functions.paypal-create-order]
+verify_jwt = false
+
+[functions.paypal-capture-order]
+verify_jwt = false

@@ -16,6 +16,7 @@ import {
   HelpCircle, Link as LinkIcon, Sparkles, Shield, Server
 } from "lucide-react";
 import { PterodactylPanel } from "@/components/admin/PterodactylPanel";
+import { PterodactylConfigPanel } from "@/components/admin/PterodactylConfigPanel";
 
 type Category = "game" | "vps" | "web" | "bot";
 
@@ -2032,6 +2033,7 @@ We use cookies to enhance your experience...`}
 
           {/* Pterodactyl Panel Tab */}
           <TabsContent value="pterodactyl" className="space-y-6">
+            <PterodactylConfigPanel />
             <PterodactylPanel />
           </TabsContent>
         </Tabs>

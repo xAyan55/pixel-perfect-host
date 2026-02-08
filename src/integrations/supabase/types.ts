@@ -143,6 +143,125 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          amount: number
+          billing_cycle: string
+          created_at: string
+          currency: string
+          id: string
+          order_type: string
+          paypal_capture_id: string | null
+          paypal_order_id: string | null
+          plan_id: string
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+          user_id: string
+          user_server_id: string | null
+        }
+        Insert: {
+          amount: number
+          billing_cycle?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          order_type?: string
+          paypal_capture_id?: string | null
+          paypal_order_id?: string | null
+          plan_id: string
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+          user_id: string
+          user_server_id?: string | null
+        }
+        Update: {
+          amount?: number
+          billing_cycle?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          order_type?: string
+          paypal_capture_id?: string | null
+          paypal_order_id?: string | null
+          plan_id?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+          user_id?: string
+          user_server_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "hosting_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_user_server_id_fkey"
+            columns: ["user_server_id"]
+            isOneToOne: false
+            referencedRelation: "user_servers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_pterodactyl_config: {
+        Row: {
+          allocations: number
+          backups: number
+          cpu: number
+          created_at: string
+          databases: number
+          disk: number
+          egg_id: number
+          id: string
+          memory: number
+          nest_id: number
+          node_id: number
+          plan_id: string
+          updated_at: string
+        }
+        Insert: {
+          allocations?: number
+          backups?: number
+          cpu: number
+          created_at?: string
+          databases?: number
+          disk: number
+          egg_id: number
+          id?: string
+          memory: number
+          nest_id: number
+          node_id: number
+          plan_id: string
+          updated_at?: string
+        }
+        Update: {
+          allocations?: number
+          backups?: number
+          cpu?: number
+          created_at?: string
+          databases?: number
+          disk?: number
+          egg_id?: number
+          id?: string
+          memory?: number
+          nest_id?: number
+          node_id?: number
+          plan_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_pterodactyl_config_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: true
+            referencedRelation: "hosting_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_settings: {
         Row: {
           created_at: string
@@ -221,6 +340,59 @@ export type Database = {
         }
         Relationships: []
       }
+      user_servers: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          panel_email: string | null
+          panel_username: string | null
+          plan_id: string
+          pterodactyl_server_id: number | null
+          pterodactyl_user_id: number | null
+          server_name: string
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          panel_email?: string | null
+          panel_username?: string | null
+          plan_id: string
+          pterodactyl_server_id?: number | null
+          pterodactyl_user_id?: number | null
+          server_name: string
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          panel_email?: string | null
+          panel_username?: string | null
+          plan_id?: string
+          pterodactyl_server_id?: number | null
+          pterodactyl_user_id?: number | null
+          server_name?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_servers_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "hosting_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -237,6 +409,14 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       hosting_category: "game" | "vps" | "web" | "bot"
+      order_status:
+        | "pending"
+        | "paid"
+        | "provisioning"
+        | "active"
+        | "suspended"
+        | "cancelled"
+        | "expired"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -366,6 +546,15 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user"],
       hosting_category: ["game", "vps", "web", "bot"],
+      order_status: [
+        "pending",
+        "paid",
+        "provisioning",
+        "active",
+        "suspended",
+        "cancelled",
+        "expired",
+      ],
     },
   },
 } as const
