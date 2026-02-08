@@ -12,6 +12,9 @@ import BotHosting from "@/pages/BotHosting";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import AdminLogin from "@/pages/AdminLogin";
 import Admin from "@/pages/Admin";
+import Auth from "@/pages/Auth";
+import Checkout from "@/pages/Checkout";
+import Client from "@/pages/Client";
 import NotFound from "@/pages/NotFound";
 
 export const AnimatedRoutes = () => {
@@ -113,6 +116,30 @@ export const AnimatedRoutes = () => {
           element={
             <PageTransition>
               <Admin />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/auth"
+          element={
+            <PageTransition>
+              <Auth />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <PageTransition>
+              <Checkout />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/client"
+          element={
+            <PageTransition>
+              <Client />
             </PageTransition>
           }
         />
