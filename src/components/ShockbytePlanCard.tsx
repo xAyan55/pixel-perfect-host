@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Server, ShoppingCart } from "lucide-react";
 import { BillingCycle } from "./BillingToggle";
+import { useNavigate } from "react-router-dom";
 
 interface Plan {
   id: string;
@@ -25,6 +26,7 @@ interface ShockbytePlanCardProps {
 }
 
 export function ShockbytePlanCard({ plan, index = 0, billingCycle = "monthly" }: ShockbytePlanCardProps) {
+  const navigate = useNavigate();
   // Calculate discounted price based on billing cycle
   const getDiscountMultiplier = () => {
     switch (billingCycle) {
@@ -113,13 +115,11 @@ export function ShockbytePlanCard({ plan, index = 0, billingCycle = "monthly" }:
 
         {/* Buy Now Button */}
         <Button
-          asChild
           className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-primary/20"
+          onClick={() => navigate(`/checkout?plan=${plan.id}`)}
         >
-          <a href={plan.redirect_url} target="_blank" rel="noopener noreferrer">
-            <ShoppingCart className="w-4 h-4 mr-2" />
-            Buy Now
-          </a>
+          <ShoppingCart className="w-4 h-4 mr-2" />
+          Buy Now
         </Button>
       </div>
     </div>
