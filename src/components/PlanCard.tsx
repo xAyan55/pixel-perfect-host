@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, HardDrive, Cpu, Wifi } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Plan {
   id: string;
@@ -23,6 +24,7 @@ interface PlanCardProps {
 }
 
 export function PlanCard({ plan, index = 0 }: PlanCardProps) {
+  const navigate = useNavigate();
   return (
     <Card
       className={`relative bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden transition-all duration-500 hover:-translate-y-2 group ${
@@ -96,17 +98,15 @@ export function PlanCard({ plan, index = 0 }: PlanCardProps) {
 
         {/* CTA Button */}
         <Button
-          asChild
           className={`w-full ${
             plan.popular
               ? "bg-primary hover:bg-primary/90"
               : "bg-card hover:bg-primary/10 border border-border/50"
           }`}
           variant={plan.popular ? "default" : "outline"}
+          onClick={() => navigate(`/checkout?plan=${plan.id}`)}
         >
-          <a href={plan.redirect_url} target="_blank" rel="noopener noreferrer">
-            Get Started
-          </a>
+          Get Started
         </Button>
       </CardContent>
 
