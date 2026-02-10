@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { HardDrive, Cpu, Database, ArrowRight, Server, Sparkles, ChevronRight } from "lucide-react";
 
@@ -22,6 +22,7 @@ interface BannerSettings {
 }
 
 export const FeaturedBanner = () => {
+  const navigate = useNavigate();
   const [popularPlan, setPopularPlan] = useState<Plan | null>(null);
   const [settings, setSettings] = useState<BannerSettings>({
     featured_banner_title: "UPDATE AVAILABLE",
@@ -147,14 +148,12 @@ export const FeaturedBanner = () => {
           </div>
 
           {/* Order Button */}
-          <a
-            href={popularPlan.redirect_url}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => navigate(`/checkout?plan=${popularPlan.id}`)}
             className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all duration-300 hover:-translate-y-0.5"
           >
             Order Now
-          </a>
+          </button>
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { HelpCircle, Minus, Plus, Box, Cpu, Layers, Smartphone, Server } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -31,6 +32,7 @@ const playerMarks = [
 ];
 
 export const RamCalculator = () => {
+  const navigate = useNavigate();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [serverType, setServerType] = useState<ServerType>("vanilla");
   const [playerCount, setPlayerCount] = useState(0);
@@ -231,14 +233,12 @@ export const RamCalculator = () => {
             </div>
 
             {/* Order Button */}
-            <a
-              href={recommendedPlan.redirect_url}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => navigate(`/checkout?plan=${recommendedPlan.id}`)}
               className="mt-3 w-full max-w-xs inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all duration-200"
             >
               Order Now
-            </a>
+            </button>
           </div>
         </div>
       )}
