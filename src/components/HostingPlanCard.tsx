@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, HardDrive, Cpu, Wifi, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Plan {
   id: string;
@@ -22,6 +23,7 @@ interface HostingPlanCardProps {
 }
 
 export function HostingPlanCard({ plan, index = 0 }: HostingPlanCardProps) {
+  const navigate = useNavigate();
   return (
     <div
       className={`group relative rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 ${
@@ -105,17 +107,15 @@ export function HostingPlanCard({ plan, index = 0 }: HostingPlanCardProps) {
 
         {/* CTA Button */}
         <Button
-          asChild
           className={`w-full transition-all duration-300 ${
             plan.popular
               ? "bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
               : "bg-card hover:bg-primary/10 border border-border/50 hover:border-primary/30"
           }`}
           variant={plan.popular ? "default" : "outline"}
+          onClick={() => navigate(`/checkout?plan=${plan.id}`)}
         >
-          <a href={plan.redirect_url} target="_blank" rel="noopener noreferrer">
-            Get Started
-          </a>
+          Get Started
         </Button>
 
         {/* Hover glow effect */}
