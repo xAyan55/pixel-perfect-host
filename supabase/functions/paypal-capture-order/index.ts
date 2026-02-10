@@ -6,9 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const PAYPAL_API_URL = Deno.env.get('PAYPAL_MODE') === 'live' 
-  ? 'https://api-m.paypal.com'
-  : 'https://api-m.sandbox.paypal.com';
+const PAYPAL_API_URL = 'https://api-m.paypal.com';
 
 const PTERODACTYL_URL = Deno.env.get('PTERODACTYL_URL')!;
 const PTERODACTYL_API_KEY = Deno.env.get('PTERODACTYL_API_KEY')!;
@@ -87,15 +85,15 @@ serve(async (req) => {
     );
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
         status: 401, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       });
     }
 
-    const userId = claimsData.claims.sub as string;
+    const userId = user.id;
     const { paypalOrderId } = await req.json();
 
     if (!paypalOrderId) {
