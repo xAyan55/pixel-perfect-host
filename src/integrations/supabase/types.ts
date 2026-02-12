@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      discount_coupons: {
+        Row: {
+          code: string
+          created_at: string
+          current_uses: number
+          discount_type: string
+          discount_value: number
+          enabled: boolean
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          min_order_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          current_uses?: number
+          discount_type?: string
+          discount_value: number
+          enabled?: boolean
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          min_order_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          current_uses?: number
+          discount_type?: string
+          discount_value?: number
+          enabled?: boolean
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          min_order_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       faqs: {
         Row: {
           answer: string
@@ -147,8 +189,10 @@ export type Database = {
         Row: {
           amount: number
           billing_cycle: string
+          coupon_code: string | null
           created_at: string
           currency: string
+          discount_amount: number | null
           id: string
           order_type: string
           paypal_capture_id: string | null
@@ -162,8 +206,10 @@ export type Database = {
         Insert: {
           amount: number
           billing_cycle?: string
+          coupon_code?: string | null
           created_at?: string
           currency?: string
+          discount_amount?: number | null
           id?: string
           order_type?: string
           paypal_capture_id?: string | null
@@ -177,8 +223,10 @@ export type Database = {
         Update: {
           amount?: number
           billing_cycle?: string
+          coupon_code?: string | null
           created_at?: string
           currency?: string
+          discount_amount?: number | null
           id?: string
           order_type?: string
           paypal_capture_id?: string | null

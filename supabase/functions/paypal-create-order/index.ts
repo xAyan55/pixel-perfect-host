@@ -56,7 +56,7 @@ serve(async (req) => {
     const userId = user.id;
     const userEmail = user.email || '';
 
-    const { planId, serverName, billingCycle = 'month', orderType = 'new', userServerId } = await req.json();
+    const { planId, serverName, billingCycle = 'month', orderType = 'new', userServerId, couponCode } = await req.json();
 
     if (!planId || !serverName) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), { 
@@ -65,8 +65,13 @@ serve(async (req) => {
       });
     }
 
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
     // Get plan details
-    const { data: plan, error: planError } = await supabase
+    const { data: plan, error: planError } = await supabaseAdmin
       .from('hosting_plans')
       .select('*')
       .eq('id', planId)
@@ -81,17 +86,54 @@ serve(async (req) => {
 
     // Calculate price based on billing cycle
     let multiplier = 1;
-    let discount = 0;
+    let cycleDiscount = 0;
     if (billingCycle === 'quarter') {
       multiplier = 3;
-      discount = 0.10; // 10% discount
+      cycleDiscount = 0.10;
     } else if (billingCycle === 'year') {
       multiplier = 12;
-      discount = 0.20; // 20% discount
+      cycleDiscount = 0.20;
     }
     
     const baseAmount = Number(plan.price) * multiplier;
-    const finalAmount = (baseAmount * (1 - discount)).toFixed(2);
+    let subtotal = baseAmount * (1 - cycleDiscount);
+
+    // Validate and apply coupon
+    let couponDiscount = 0;
+    let validCouponCode: string | null = null;
+
+    if (couponCode) {
+      const { data: coupon, error: couponError } = await supabaseAdmin
+        .from('discount_coupons')
+        .select('*')
+        .eq('code', couponCode)
+        .eq('enabled', true)
+        .maybeSingle();
+
+      if (coupon && !couponError) {
+        const now = new Date();
+        const notExpired = !coupon.expires_at || new Date(coupon.expires_at) > now;
+        const notMaxed = !coupon.max_uses || coupon.current_uses < coupon.max_uses;
+        const meetsMin = subtotal >= Number(coupon.min_order_amount || 0);
+
+        if (notExpired && notMaxed && meetsMin) {
+          if (coupon.discount_type === 'percentage') {
+            couponDiscount = subtotal * (Number(coupon.discount_value) / 100);
+          } else {
+            couponDiscount = Math.min(Number(coupon.discount_value), subtotal);
+          }
+          validCouponCode = coupon.code;
+
+          // Increment usage
+          await supabaseAdmin
+            .from('discount_coupons')
+            .update({ current_uses: coupon.current_uses + 1 })
+            .eq('id', coupon.id);
+        }
+      }
+    }
+
+    const finalAmount = Math.max(0, subtotal - couponDiscount).toFixed(2);
 
     // Create PayPal order
     const accessToken = await getPayPalAccessToken();
@@ -131,12 +173,6 @@ serve(async (req) => {
       });
     }
 
-    // Create order in database using service role for insert
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    );
-
     const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
       .insert({
@@ -148,6 +184,8 @@ serve(async (req) => {
         paypal_order_id: paypalOrder.id,
         status: 'pending',
         user_server_id: userServerId || null,
+        coupon_code: validCouponCode,
+        discount_amount: couponDiscount,
       })
       .select()
       .single();
@@ -159,14 +197,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       });
     }
-
-    // Store server name and user info in metadata for provisioning later
-    await supabaseAdmin
-      .from('orders')
-      .update({ 
-        // We'll use a simple approach - store metadata in a way that's accessible
-      })
-      .eq('id', order.id);
 
     // For new orders, create a pending user_server entry
     if (orderType === 'new') {

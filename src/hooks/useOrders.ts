@@ -8,6 +8,7 @@ interface CreateOrderParams {
   billingCycle: 'month' | 'quarter' | 'year';
   orderType?: 'new' | 'renew' | 'upgrade';
   userServerId?: string;
+  couponCode?: string;
 }
 
 interface CaptureOrderParams {
