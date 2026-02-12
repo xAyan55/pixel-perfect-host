@@ -10,8 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Loader2, Server, CreditCard, ShieldCheck, ArrowLeft } from "lucide-react";
+import { Loader2, Server, CreditCard, ShieldCheck, ArrowLeft, Tag, Check, X } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
+import { useToast } from "@/hooks/use-toast";
 
 interface Plan {
   id: string;
@@ -29,10 +30,22 @@ export default function Checkout() {
   const { user, isLoading: authLoading } = useAuth();
   const { createOrder, loading: orderLoading } = useOrders();
 
+  const { toast } = useToast();
+
   const [plan, setPlan] = useState<Plan | null>(null);
   const [serverName, setServerName] = useState("");
   const [billingCycle, setBillingCycle] = useState<'month' | 'quarter' | 'year'>('month');
   const [loadingPlan, setLoadingPlan] = useState(true);
+
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discount_type: string;
+    discount_value: number;
+  } | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState("");
 
   const planId = searchParams.get('plan');
 
@@ -67,28 +80,86 @@ export default function Checkout() {
     fetchPlan();
   }, [planId, navigate]);
 
-  const calculatePrice = (): string => {
-    if (!plan) return "0";
+  const calculateSubtotal = (): number => {
+    if (!plan) return 0;
     const basePrice = plan.price;
-    
-    if (billingCycle === 'quarter') {
-      return (basePrice * 3 * 0.9).toFixed(2); // 10% discount
-    } else if (billingCycle === 'year') {
-      return (basePrice * 12 * 0.8).toFixed(2); // 20% discount
+    if (billingCycle === 'quarter') return basePrice * 3 * 0.9;
+    if (billingCycle === 'year') return basePrice * 12 * 0.8;
+    return basePrice;
+  };
+
+  const getCouponDiscount = (): number => {
+    if (!appliedCoupon) return 0;
+    const subtotal = calculateSubtotal();
+    if (appliedCoupon.discount_type === 'percentage') {
+      return subtotal * (appliedCoupon.discount_value / 100);
     }
-    return basePrice.toFixed(2);
+    return Math.min(appliedCoupon.discount_value, subtotal);
+  };
+
+  const calculatePrice = (): string => {
+    return Math.max(0, calculateSubtotal() - getCouponDiscount()).toFixed(2);
   };
 
   const getMonthlyEquivalent = (): string => {
     if (!plan) return "0";
     const total = parseFloat(calculatePrice());
-    
-    if (billingCycle === 'quarter') {
-      return (total / 3).toFixed(2);
-    } else if (billingCycle === 'year') {
-      return (total / 12).toFixed(2);
-    }
+    if (billingCycle === 'quarter') return (total / 3).toFixed(2);
+    if (billingCycle === 'year') return (total / 12).toFixed(2);
     return total.toFixed(2);
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError("");
+
+    try {
+      const { data, error } = await supabase
+        .from('discount_coupons')
+        .select('*')
+        .eq('code', couponCode.trim().toUpperCase())
+        .eq('enabled', true)
+        .maybeSingle();
+
+      if (error || !data) {
+        setCouponError("Invalid coupon code");
+        return;
+      }
+
+      if (data.expires_at && new Date(data.expires_at) < new Date()) {
+        setCouponError("This coupon has expired");
+        return;
+      }
+
+      if (data.max_uses && data.current_uses >= data.max_uses) {
+        setCouponError("This coupon has reached its usage limit");
+        return;
+      }
+
+      const subtotal = calculateSubtotal();
+      if (data.min_order_amount && subtotal < Number(data.min_order_amount)) {
+        setCouponError(`Minimum order amount is $${Number(data.min_order_amount).toFixed(2)}`);
+        return;
+      }
+
+      setAppliedCoupon({
+        code: data.code,
+        discount_type: data.discount_type,
+        discount_value: Number(data.discount_value),
+      });
+      toast({ title: "Coupon applied!", description: `Discount "${data.code}" has been applied.` });
+    } catch {
+      setCouponError("Failed to validate coupon");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError("");
   };
 
   const handleCheckout = async () => {
@@ -99,6 +170,7 @@ export default function Checkout() {
         planId: plan.id,
         serverName: serverName.trim(),
         billingCycle,
+        couponCode: appliedCoupon?.code,
       });
 
       if (result?.approveUrl) {
@@ -219,6 +291,55 @@ export default function Checkout() {
                   </RadioGroup>
                 </CardContent>
               </Card>
+
+              {/* Coupon Code */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Tag className="w-5 h-5 text-primary" />
+                    Discount Code
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {appliedCoupon ? (
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20">
+                      <div className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-primary" />
+                        <span className="font-medium text-sm">{appliedCoupon.code}</span>
+                        <span className="text-xs text-muted-foreground">
+                          ({appliedCoupon.discount_type === 'percentage' 
+                            ? `${appliedCoupon.discount_value}% off` 
+                            : `$${appliedCoupon.discount_value.toFixed(2)} off`})
+                        </span>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={removeCoupon}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Enter coupon code"
+                          value={couponCode}
+                          onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
+                          maxLength={30}
+                        />
+                        <Button 
+                          variant="outline" 
+                          onClick={handleApplyCoupon} 
+                          disabled={couponLoading || !couponCode.trim()}
+                        >
+                          {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                        </Button>
+                      </div>
+                      {couponError && (
+                        <p className="text-xs text-destructive">{couponError}</p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
 
             {/* Order Summary */}
@@ -248,8 +369,14 @@ export default function Checkout() {
                     </div>
                     {billingCycle !== 'month' && (
                       <div className="flex justify-between text-primary">
-                        <span>Discount</span>
+                        <span>Cycle Discount</span>
                         <span>-{billingCycle === 'quarter' ? '10%' : '20%'}</span>
+                      </div>
+                    )}
+                    {appliedCoupon && (
+                      <div className="flex justify-between text-primary">
+                        <span>Coupon ({appliedCoupon.code})</span>
+                        <span>-${getCouponDiscount().toFixed(2)}</span>
                       </div>
                     )}
                   </div>
