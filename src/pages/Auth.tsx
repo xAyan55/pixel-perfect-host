@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Mail, Lock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SEOHead } from "@/components/SEOHead";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -27,6 +28,18 @@ export default function Auth() {
   const [lastName, setLastName] = useState("");
 
   const redirect = searchParams.get('redirect') || '/client';
+
+  const { data: bgImageUrl } = useQuery({
+    queryKey: ['auth-bg-image'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('site_settings')
+        .select('setting_value')
+        .eq('setting_key', 'auth_bg_image_url')
+        .single();
+      return data?.setting_value || null;
+    },
+  });
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -130,10 +143,18 @@ export default function Auth() {
         title="Sign In | KineticHost"
         description="Sign in to your KineticHost account to manage your servers."
       />
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background relative">
+        {bgImageUrl && (
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${bgImageUrl})` }}
+          >
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+          </div>
+        )}
         <Navbar />
         
-        <main className="container mx-auto px-4 py-24">
+        <main className="relative container mx-auto px-4 py-24">
           <div className="max-w-md mx-auto">
             <Card>
               <CardHeader className="text-center">
