@@ -105,6 +105,8 @@ interface SiteSettings {
   privacy_policy_title: string;
   privacy_policy_content: string;
   privacy_policy_last_updated: string;
+  // Auth page
+  auth_bg_image_url: string;
 }
 
 const categoryIcons = {
@@ -223,6 +225,7 @@ export default function Admin() {
     privacy_policy_title: "Privacy Policy",
     privacy_policy_content: "",
     privacy_policy_last_updated: new Date().toISOString().split("T")[0],
+    auth_bg_image_url: "",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<string | null>(null);
@@ -603,7 +606,7 @@ export default function Admin() {
 
   const handleImageUpload = async (
     file: File, 
-    type: "logo" | "favicon" | "panel_preview" | "featured_banner" | "features_section_logo" | "plan" | "game_hero" | "vps_hero" | "web_hero" | "bot_hero" | "minecraft_hero" | "hytale_hero" | "terraria_hero" | "minecraft_card" | "hytale_card" | "terraria_card" | "minecraft_java_card" | "minecraft_bedrock_card" | "minecraft_crossplay_card" | "hytale_budget_card" | "hytale_premium_card" | "terraria_budget_card" | "terraria_premium_card",
+    type: "logo" | "favicon" | "panel_preview" | "featured_banner" | "features_section_logo" | "plan" | "game_hero" | "vps_hero" | "web_hero" | "bot_hero" | "minecraft_hero" | "hytale_hero" | "terraria_hero" | "minecraft_card" | "hytale_card" | "terraria_card" | "minecraft_java_card" | "minecraft_bedrock_card" | "minecraft_crossplay_card" | "hytale_budget_card" | "hytale_premium_card" | "terraria_budget_card" | "terraria_premium_card" | "auth_bg",
     planId?: string
   ) => {
     setUploadingImage(type === "plan" ? planId! : type);
@@ -649,6 +652,7 @@ export default function Admin() {
       hytale_premium_card: "hytale_premium_card_image_url",
       terraria_budget_card: "terraria_budget_card_image_url",
       terraria_premium_card: "terraria_premium_card_image_url",
+      auth_bg: "auth_bg_image_url",
     };
 
     if (type === "plan" && editingPlan) {
@@ -1559,6 +1563,53 @@ We use cookies to enhance your experience...`}
                         </div>
                       </div>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Auth Page Background */}
+              <Card className="bg-card/50 border-border/50">
+                <CardHeader>
+                  <CardTitle className="text-lg">Auth Page Background</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Set a background image for the login/signup page.
+                  </p>
+                  <div className="space-y-3">
+                    {siteSettings.auth_bg_image_url ? (
+                      <img src={siteSettings.auth_bg_image_url} alt="Auth Background" className="h-32 w-full rounded object-cover bg-muted" />
+                    ) : (
+                      <div className="h-32 w-full rounded bg-muted flex items-center justify-center">
+                        <Image className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                    )}
+                    <Input
+                      value={siteSettings.auth_bg_image_url}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, auth_bg_image_url: e.target.value })}
+                      placeholder="Image URL"
+                    />
+                    <label className="cursor-pointer inline-block">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(file, "auth_bg");
+                        }}
+                      />
+                      <Button variant="outline" size="sm" asChild disabled={uploadingImage === "auth_bg"}>
+                        <span>
+                          {uploadingImage === "auth_bg" ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Upload className="w-4 h-4 mr-2" />
+                          )}
+                          Upload
+                        </span>
+                      </Button>
+                    </label>
                   </div>
                 </CardContent>
               </Card>

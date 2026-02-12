@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Terminal, ChevronRight } from "lucide-react";
+import { Terminal, ChevronRight, LogIn, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -15,6 +16,7 @@ export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [controlPanelUrl, setControlPanelUrl] = useState("#");
   const location = useLocation();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchControlPanelUrl = async () => {
@@ -82,8 +84,25 @@ export const Navbar = () => {
             ))}
           </div>
 
-          {/* CTA Button - Hidden on mobile, shown in bottom nav */}
-          <div className="hidden lg:flex items-center gap-4">
+          {/* CTA Buttons - Hidden on mobile, shown in bottom nav */}
+          <div className="hidden lg:flex items-center gap-3">
+            {user ? (
+              <Link
+                to="/client"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/20 transition-all duration-300"
+              >
+                <User className="w-4 h-4" />
+                <span>Client Area</span>
+              </Link>
+            ) : (
+              <Link
+                to="/auth"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/20 transition-all duration-300"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Sign In</span>
+              </Link>
+            )}
             <a 
               href={controlPanelUrl} 
               target="_blank" 
