@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import kineticLogo from "@/assets/kinetic-logo.png";
 import { Link, useLocation } from "react-router-dom";
 import { Terminal, ChevronRight, LogIn, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,16 +52,7 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-14 md:h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/30 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 border border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-all duration-300">
-                <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                  <path d="M2 17l10 5 10-5" />
-                  <path d="M2 12l10 5 10-5" />
-                </svg>
-              </div>
-            </div>
+            <img src={kineticLogo} alt="KineticHost" className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl" />
             <span className="text-lg sm:text-xl font-bold tracking-tight">
               <span className="text-primary">KINETIC</span>
               <span className="text-foreground">HOST</span>
